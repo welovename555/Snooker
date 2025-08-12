@@ -20,14 +20,14 @@
           },
           keyframes: {
             floaty: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-6px)' } },
-            shimmer: { '0%': { backgroundPosition: '0% 50%' }, '100%': { backgroundPosition: '100% 50%' } },
+            shimmer: { '0%': { backgroundPosition: '0% 50%' }, '100%': { backgroundPosition: '200% 50%' } },
             pop: { '0%': { transform:'scale(.92)', opacity:.0 }, '100%': { transform:'scale(1)', opacity:1 } },
             confetti: { '0%': { transform: 'translateY(-80vh) rotate(0deg)' }, '100%': { transform: 'translateY(20vh) rotate(540deg)', opacity:.9 } },
             flare: { '0%': { opacity:.0, transform:'scale(.8)' }, '100%': { opacity:1, transform:'scale(1)' } }
           },
           animation: {
             floaty: 'floaty 4s ease-in-out infinite',
-            shimmer: 'shimmer 3s linear infinite',
+            shimmer: 'shimmer 2.2s linear infinite',
             pop: 'pop .28s ease-out both',
             flare: 'flare .4s ease-out both'
           }
@@ -47,14 +47,25 @@
     .btn-glass{ background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06)); }
     .grid-anim:before, .grid-anim:after{ content:""; position:absolute; inset:-50%; background: radial-gradient(closest-side, rgba(56,189,248,.06), transparent 70%) 0 0/40% 40% repeat; transform: rotate(15deg); animation: floaty 14s linear infinite; }
     .grid-anim:after{ background: radial-gradient(closest-side, rgba(236,72,153,.05), transparent 70%) 0 0/45% 45% repeat; animation-duration: 18s; animation-direction: reverse; }
+
     /* Ball sphere effect */
     .sphere{ position:relative; border-radius:9999px; box-shadow: inset 0 -10px 24px rgba(0,0,0,.45), inset 0 12px 18px rgba(255,255,255,.25), 0 8px 24px rgba(0,0,0,.35); }
     .sphere:after{ content:""; position:absolute; inset:0; border-radius:9999px; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.55), rgba(255,255,255,0) 44%); pointer-events:none; }
     .press{ transform: translateY(0); transition: transform .08s ease; }
     .press:active{ transform: translateY(2px) scale(.98); }
+
     /* Ripple */
     .ripple{ position:absolute; border-radius:9999px; transform: translate(-50%,-50%); pointer-events:none; width:10px; height:10px; background: radial-gradient(circle, rgba(255,255,255,.6), rgba(255,255,255,0) 70%); animation: ripple .6s ease-out forwards; }
     @keyframes ripple{ from { opacity:.7; transform:translate(-50%,-50%) scale(.8);} to { opacity:0; transform:translate(-50%,-50%) scale(8);} }
+
+    /* Absolute centered label to prevent drift on tab switch */
+    .center-abs{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; will-change:transform; }
+
+    /* Notice styling */
+    #noticeCard{ box-shadow: 0 12px 40px rgba(0,0,0,.45); }
+    #noticeBar{ position:absolute; inset:0 auto 0 0; background: linear-gradient(90deg, rgba(255,255,255,.2), rgba(255,255,255,.05)); }
+    #noticeBar::after{ content:""; position:absolute; inset:0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent); background-size: 200% 100%; animation: shimmer 2.2s linear infinite; mix-blend-mode: screen; }
+    #noticeBall{ box-shadow: 0 6px 14px rgba(0,0,0,.35), inset 0 8px 12px rgba(255,255,255,.28); }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 relative overflow-x-hidden">
@@ -161,11 +172,14 @@
 
   <!-- Centered Notice (modern progress + running ball) -->
   <div id="notice" class="fixed inset-0 z-[60] grid place-items-center pointer-events-none hidden">
-    <div class="min-w-[280px] w-[min(92vw,420px)] px-4 py-3 rounded-2xl bg-white/10 border border-white/15 backdrop-blur shadow-xl animate-pop">
-      <div class="text-xs text-slate-200 text-center"><span id="noticeLabel">บันทึกการกด</span> · <span id="noticeText" class="text-emerald-300 font-semibold"></span></div>
+    <div id="noticeCard" class="min-w-[280px] w-[min(92vw,420px)] px-4 py-3 rounded-2xl bg-white/10 border border-white/15 backdrop-blur animate-pop">
+      <div class="flex items-center justify-center gap-2 text-xs text-slate-200">
+        <svg width="14" height="14" viewBox="0 0 24 24" class="opacity-80"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2m1 15h-2v-2h2Zm0-4h-2V7h2Z"/></svg>
+        <span id="noticeLabel">บันทึกการกด</span> · <span id="noticeText" class="text-emerald-300 font-semibold"></span>
+      </div>
       <div class="mt-2 h-3 rounded-full bg-white/10 relative overflow-hidden">
         <div id="noticeBar" class="absolute inset-y-0 left-0" style="width:0%"></div>
-        <div id="noticeBall" class="absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full shadow ring-1 ring-white/40" style="left:-12px"></div>
+        <div id="noticeBall" class="absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full ring-1 ring-white/40" style="left:-12px"></div>
       </div>
       <div id="noticePct" class="mt-1 text-center text-[10px] text-slate-300">0%</div>
     </div>
@@ -201,26 +215,6 @@
     </div>
   </div>
 
-  <!-- Pretty Confirm Modal -->
-  <div id="confirm" class="fixed inset-0 z-[80] hidden">
-    <div class="absolute inset-0 bg-gradient-to-br from-slate-950/80 via-slate-900/70 to-slate-950/80 backdrop-blur-sm"></div>
-    <div class="absolute inset-0 grid place-items-center p-4">
-      <div class="w-[min(96vw,420px)] rounded-3xl card-glass border border-white/10 shadow-2xl animate-pop">
-        <div class="px-5 pt-5 pb-4 text-center">
-          <div class="mx-auto w-14 h-14 rounded-2xl grid place-items-center bg-rose-500/20 ring-1 ring-rose-300/30">
-            <svg viewBox="0 0 24 24" class="w-7 h-7 text-rose-300" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-          </div>
-          <h3 id="confirmTitle" class="mt-3 text-xl font-bold">ยืนยันการลบ</h3>
-          <p id="confirmMsg" class="mt-1 text-slate-300"></p>
-          <div class="mt-4 flex items-center justify-center gap-2">
-            <button data-action="confirm-no" class="px-4 py-2 rounded-xl btn-glass hover:bg-white/20">ยกเลิก</button>
-            <button data-action="confirm-yes" id="confirmYes" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700">ลบ</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Simple Modal (fallback) -->
   <div id="modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 hidden">
     <div class="w-full max-w-sm rounded-2xl bg-slate-900 border border-white/10 shadow-2xl p-5">
@@ -232,6 +226,37 @@
     </div>
   </div>
 
+  <!-- Beautiful Confirm Dialog -->
+  <div id="confirm" class="fixed inset-0 z-[80] hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-rose-900/40 via-slate-900/60 to-rose-900/40 backdrop-blur-sm"></div>
+    <div class="absolute inset-0 grid place-items-center p-4">
+      <div class="relative w-[min(96vw,420px)] rounded-3xl border border-white/10 shadow-2xl card-glass animate-pop">
+        <div class="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 grid place-items-center" aria-hidden="true">
+          <svg viewBox="0 0 64 64" class="w-16 h-16 animate-floaty">
+            <defs>
+              <linearGradient id="dg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#fecaca"/>
+                <stop offset="60%" stop-color="#f87171"/>
+                <stop offset="100%" stop-color="#ef4444"/>
+              </linearGradient>
+            </defs>
+            <circle cx="32" cy="32" r="20" fill="url(#dg)"/>
+            <path d="M32 18 v18" stroke="#1f2937" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="32" cy="44" r="2.5" fill="#1f2937"/>
+          </svg>
+        </div>
+        <div class="px-5 pt-10 pb-5 text-center">
+          <h3 id="confirmTitle" class="text-xl font-extrabold">ยืนยันการลบ</h3>
+          <p id="confirmMsg" class="mt-2 text-slate-300">ต้องการลบข้อมูลนี้หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้</p>
+          <div class="mt-5 flex items-center justify-center gap-2">
+            <button data-action="confirm-cancel" class="px-4 py-2 rounded-xl btn-glass hover:bg-white/20">ยกเลิก</button>
+            <button data-action="confirm-ok" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 shadow-soft">ยืนยันลบ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Dev Tests (collapsed) -->
   <details id="dev-tests" class="px-4 py-2 select-none opacity-60">
     <summary class="cursor-pointer text-xs">Self-tests (dev)</summary>
@@ -239,12 +264,14 @@
   </details>
 
   <script>
+  (function(){
+    'use strict';
     // ===== Constants / Theme =====
-    const STORAGE_KEY = 'snooker-lite-v7';
+    const STORAGE_KEY = 'snooker-lite-v8';
     const GREEN = '#10b981';
     const RED = '#ef4444';
-    const DURATION_PLUS = 500;   // 0.5s for +
-    const DURATION_FOUL = 750;   // 0.75s for foul
+    const DURATION_PLUS = 1000;   // 1s for +
+    const DURATION_FOUL = 1000;   // 1s for foul
     const BALLS = [
       { key:'red',    label:'แดง',   value:1, hex:'#ef4444' },
       { key:'yellow', label:'เหลือง',value:2, hex:'#fde047' },
@@ -267,8 +294,9 @@
     };
 
     // ===== Utils =====
-    const $ = sel => document.querySelector(sel);
-    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    const qs = sel => document.querySelector(sel);
+    // NOTE: rename $$ → $$$ to avoid duplicate variable errors in certain sandboxes/devtools
+    const $$$ = sel => Array.from(document.querySelectorAll(sel));
     const uid = () => (crypto?.randomUUID?.() || `id_${Date.now()}_${Math.random().toString(36).slice(2,8)}`);
     const clamp = n => n|0; // integer only, allow negative
 
@@ -277,7 +305,7 @@
     }
     function load(){
       try{
-        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('snooker-lite-v6') || localStorage.getItem('snooker-lite-v5') || localStorage.getItem('snooker-lite-v4') || localStorage.getItem('snooker-lite-v3');
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('snooker-lite-v7') || localStorage.getItem('snooker-lite-v6') || localStorage.getItem('snooker-lite-v5') || localStorage.getItem('snooker-lite-v4') || localStorage.getItem('snooker-lite-v3');
         if(raw){
           const s = JSON.parse(raw);
           state.players = Array.isArray(s.players)? s.players: [];
@@ -297,6 +325,17 @@
       return { top, winnerIds: winners.map(w=>w.id), winners };
     }
 
+    // Rank helper: returns sorted players with competition ranking (1,2,2,4)
+    function rankPlayers(players){
+      const sorted = players.slice().sort((a,b)=> b.score - a.score);
+      let lastScore = null, lastRank = 0;
+      return sorted.map((p,i)=>{
+        const pos = (lastScore===null || p.score < lastScore) ? (i+1) : lastRank;
+        lastScore = p.score; lastRank = pos;
+        return { ...p, pos };
+      });
+    }
+
     function filterResults(entries){
       if(state.filter.mode==='all' || !state.filter.playerId) return entries;
       return entries.filter(r => r.players.some(p => p.id === state.filter.playerId));
@@ -309,17 +348,18 @@
     // ===== Notice (centered) =====
     let noticeRAF = null;
     function runNotice({ kind='plus', text='', ballColor='#fff', barColor=GREEN, durationMs=DURATION_PLUS }){
-      const wrap = $('#notice');
-      const bar = $('#noticeBar');
-      const ball = $('#noticeBall');
-      const pct = $('#noticePct');
-      const label = $('#noticeLabel');
-      const txt = $('#noticeText');
+      const wrap = qs('#notice');
+      const bar = qs('#noticeBar');
+      const ball = qs('#noticeBall');
+      const pct = qs('#noticePct');
+      const label = qs('#noticeLabel');
+      const txt = qs('#noticeText');
       label.textContent = kind==='foul'? 'ฟาวล์' : 'บันทึกการกด';
       txt.textContent = text || '';
       txt.className = kind==='foul' ? 'text-rose-300 font-semibold' : 'text-emerald-300 font-semibold';
-      bar.style.backgroundColor = barColor;
-      ball.style.backgroundColor = ballColor;
+      // prettier bar + ball color
+      bar.style.background = `linear-gradient(90deg, ${barColor} 0%, rgba(255,255,255,.15) 100%)`;
+      ball.style.background = `radial-gradient(circle at 30% 30%, rgba(255,255,255,.7), rgba(255,255,255,0) 55%), ${ballColor}`;
       wrap.classList.remove('hidden');
       const start = performance.now();
       const tick = now => {
@@ -332,28 +372,10 @@
       cancelAnimationFrame(noticeRAF); noticeRAF = requestAnimationFrame(tick);
     }
 
-    // ===== Pretty Confirm =====
-    let confirmResolve = null;
-    function askConfirm({ title='ยืนยันการทำรายการ', message='', confirmText='ยืนยัน', cancelText='ยกเลิก' }){
-      return new Promise((resolve)=>{
-        confirmResolve = resolve;
-        $('#confirmTitle').textContent = title;
-        $('#confirmMsg').textContent = message;
-        const yes = $('#confirmYes');
-        yes.textContent = confirmText;
-        $('#confirm').classList.remove('hidden');
-      });
-    }
-    function closeConfirm(ok){
-      if(confirmResolve){ try{ confirmResolve(!!ok); }catch(_){} }
-      confirmResolve = null;
-      $('#confirm').classList.add('hidden');
-    }
-
     // ===== Celebrate (grand popup) =====
     function showCelebrate(entry){
       // Confetti
-      const fx = $('#celebrateFX');
+      const fx = qs('#celebrateFX');
       fx.innerHTML = '';
       const colors = ['#ef4444','#fde047','#22c55e','#2563eb','#ec4899','#ffffff','#f5c542'];
       for(let i=0;i<80;i++){
@@ -374,33 +396,33 @@
         fx.appendChild(d);
       }
 
-      const msgEl = $('#celebrateMsg');
-      const board = $('#celebrateBoard');
+      const msgEl = qs('#celebrateMsg');
+      const board = qs('#celebrateBoard');
       const { winners } = computeWinners(entry.players);
       if(winners.length===1){
         msgEl.innerHTML = `ผู้ชนะคือ <span class="gold-text font-extrabold">${escapeHtml(winners[0].name)}</span> ด้วยคะแนน <b>${winners[0].score}</b>`;
       } else {
         msgEl.innerHTML = `ผลเสมอ: <span class="text-amber-300 font-semibold">${escapeHtml(winners.map(w=>w.name).join(' • '))}</span> (${winners[0]?.score ?? 0} แต้ม)`;
       }
-      const rows = entry.players.slice().sort((a,b)=> b.score-a.score).map(p=>{
+      const rows = rankPlayers(entry.players).map(p=>{
         return `<div class="flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 border border-white/10 mt-2">
-          <div class="font-semibold">${escapeHtml(p.name)}</div>
+          <div class="font-semibold"><span class="text-slate-400 mr-1">#${p.pos}</span>${escapeHtml(p.name)}</div>
           <div class="text-lg font-extrabold">${p.score}</div>
         </div>`;
       }).join('');
       board.innerHTML = rows;
 
-      $('#celebrate').classList.remove('hidden');
+      qs('#celebrate').classList.remove('hidden');
     }
-    function hideCelebrate(){ $('#celebrate').classList.add('hidden'); }
+    function hideCelebrate(){ qs('#celebrate').classList.add('hidden'); }
 
     // ===== Renderers =====
     function render(){
       // Selected name
-      $('#selectedName').textContent = selected()?.name || '—';
+      qs('#selectedName').textContent = selected()?.name || '—';
 
       // Players list
-      const list = $('#playersList');
+      const list = qs('#playersList');
       if(state.players.length===0){
         list.innerHTML = `<div class="p-6 rounded-2xl border border-dashed border-white/20 bg-white/5 text-slate-400 text-center">ยังไม่มีผู้เล่น — เพิ่มชื่อด้านบนได้เลย</div>`;
       } else {
@@ -418,12 +440,12 @@
         `).join('');
       }
 
-      // Balls pad (fancy spheres)
-      const pad = $('#ballsPad');
+      // Balls pad (fancy spheres + robust centered labels)
+      const pad = qs('#ballsPad');
       pad.innerHTML = BALLS.map(b=>`
-        <button class="relative aspect-square rounded-full sphere press ring-1 ring-white/15 transition grid place-items-center overflow-hidden group" data-action="ball" data-key="${b.key}" style="background:${b.hex}">
-          <span class="absolute inset-0 opacity-0 group-active:opacity-20 transition" style="background: radial-gradient(circle at 50% 50%, rgba(255,255,255,.8), rgba(255,255,255,0) 60%)"></span>
-          <span class="relative text-[13px] font-extrabold drop-shadow">${b.label}</span>
+        <button class="relative aspect-square rounded-full sphere press ring-1 ring-white/15 transition overflow-hidden" data-action="ball" data-key="${b.key}" style="background:${b.hex}">
+          <span class="absolute inset-0 opacity-0 active:opacity-20 transition" style="background: radial-gradient(circle at 50% 50%, rgba(255,255,255,.8), rgba(255,255,255,0) 60%)"></span>
+          <span class="center-abs text-[13px] font-extrabold drop-shadow">${b.label}</span>
           <span class="absolute bottom-1 right-1 text-[10px] font-bold">+${b.value}</span>
         </button>
       `).join('');
@@ -431,7 +453,7 @@
       // Filters UI state
       const allBtn = document.querySelector('[data-action="filter-all"]');
       const playerBtn = document.querySelector('[data-action="filter-player"]');
-      const sel = $('#filterPlayer');
+      const sel = qs('#filterPlayer');
       allBtn.classList.toggle('bg-white/10', state.filter.mode==='all');
       playerBtn.classList.toggle('bg-white/10', state.filter.mode==='player');
       sel.disabled = state.filter.mode!=='player';
@@ -439,9 +461,9 @@
 
       // Tools visibility in edit mode
       const editBtn = document.querySelector('[data-action="history-edit-toggle"]');
-      const btnSel = $('#btnDeleteSelected');
-      const btnAll = $('#btnDeleteAll');
-      const selCount = $('#selCount');
+      const btnSel = qs('#btnDeleteSelected');
+      const btnAll = qs('#btnDeleteAll');
+      const selCount = qs('#selCount');
       if(editBtn){ editBtn.textContent = state.historyEditMode ? 'เสร็จสิ้น' : 'แก้ไข'; }
       [btnSel, btnAll, selCount].forEach(el=> el && el.classList.toggle('hidden', !state.historyEditMode));
       selCount.textContent = `เลือก ${state.selectedHistoryIds.size} รายการ`;
@@ -449,41 +471,44 @@
 
       // Results
       const filtered = filterResults(state.results);
-      $('#resultsCount').textContent = `${filtered.length} รายการ`;
-      const rList = $('#resultsList');
+      qs('#resultsCount').textContent = `${filtered.length} รายการ`;
+      const rList = qs('#resultsList');
       rList.innerHTML = filtered.map(r=>{
         const { winners } = computeWinners(r.players);
         const ts = new Date(r.at).toLocaleString('th-TH');
         const isOpen = state.expanded.has(r.id);
         const header = winners.length===1
-          ? `ผู้ชนะ: <span class="text-emerald-300">${escapeHtml(winners[0].name)}</span> (${winners[0].score} แต้ม)`
-          : `เสมอ: <span class="text-amber-300">${escapeHtml(winners.map(w=>w.name).join(' • '))}</span> (${winners[0]?.score ?? 0} แต้ม)`;
+          ? `ผู้ชนะ: <span class=\"text-emerald-300\">${escapeHtml(winners[0].name)}</span> (${winners[0].score} แต้ม)`
+          : `เสมอ: <span class=\"text-amber-300\">${escapeHtml(winners.map(w=>w.name).join(' • '))}</span> (${winners[0]?.score ?? 0} แต้ม)`;
+
+        // Always show per-player scores in details, ranked 1..n (no margin display)
         let details = '';
         if(isOpen && !state.historyEditMode){
-          if(winners.length===1){
-            const w = winners[0];
-            const losers = r.players.filter(p=>!r.winnerIds.includes(p.id));
-            details = `<div class="px-3 pb-3">${losers.map(l=>`<div class="text-sm"><span class="text-slate-300">ชนะ ${escapeHtml(l.name)}</span><span class="text-emerald-300"> +${(w.score - l.score)}</span></div>`).join('')}</div>`;
-          } else {
-            details = `<div class="px-3 pb-3 text-sm text-slate-300">ผลเสมอ — คะแนนเท่ากันทั้งหมด</div>`;
-          }
+          const ranked = rankPlayers(r.players);
+          details = `<div class=\"px-3 pb-3 space-y-1\">${ranked.map(p=>
+            `<div class=\"flex items-center justify-between text-sm\">
+               <div><span class=\"text-slate-400 mr-1\">#${p.pos}</span><span class=\"font-medium\">${escapeHtml(p.name)}</span></div>
+               <div class=\"font-semibold\">${p.score}</div>
+             </div>`
+          ).join('')}</div>`;
         }
+
         const editControls = state.historyEditMode ? `
-          <div class="px-3 pb-3 flex items-center justify-between">
-            <label class="flex items-center gap-2 text-sm">
-              <input type="checkbox" data-action="history-select" data-id="${r.id}" ${state.selectedHistoryIds.has(r.id)?'checked':''} /> เลือกรายการนี้
+          <div class=\"px-3 pb-3 flex items-center justify-between\">
+            <label class=\"flex items-center gap-2 text-sm\">
+              <input type=\"checkbox\" data-action=\"history-select\" data-id=\"${r.id}\" ${state.selectedHistoryIds.has(r.id)?'checked':''} /> เลือกรายการนี้
             </label>
-            <button class="px-3 py-1.5 text-xs rounded-lg bg-rose-600/80 hover:bg-rose-600" data-action="history-delete-item" data-id="${r.id}">ลบรายการนี้</button>
+            <button class=\"px-3 py-1.5 text-xs rounded-lg bg-rose-600/80 hover:bg-rose-600\" data-action=\"history-delete-item\" data-id=\"${r.id}\">ลบรายการนี้</button>
           </div>` : '';
 
         return `
-          <div class="rounded-xl card-glass border border-white/10">
-            <button class="w-full px-3 py-3 flex items-center justify-between" data-action="toggle-result" data-id="${r.id}">
-              <div class="text-left">
-                <div class="text-sm"><span class="text-slate-400">${ts}</span></div>
-                <div class="font-semibold mt-0.5">${header}</div>
+          <div class=\"rounded-xl card-glass border border-white/10\">
+            <button class=\"w-full px-3 py-3 flex items-center justify-between\" data-action=\"toggle-result\" data-id=\"${r.id}\">
+              <div class=\"text-left\">
+                <div class=\"text-sm\"><span class=\"text-slate-400\">${ts}</span></div>
+                <div class=\"font-semibold mt-0.5\">${header}</div>
               </div>
-              <span class="text-xs text-slate-400">${isOpen && !state.historyEditMode?'ซ่อนรายละเอียด':'ดูรายละเอียด'}</span>
+              <span class=\"text-xs text-slate-400\">${isOpen && !state.historyEditMode?'ซ่อนรายละเอียด':'ดูรายละเอียด'}</span>
             </button>
             ${state.historyEditMode ? '' : details}
             ${editControls}
@@ -499,9 +524,9 @@
 
     // ===== Actions =====
     function addPlayer(){
-      const inp = $('#nameInput');
+      const inp = qs('#nameInput');
       const name = (inp.value||'').trim();
-      if(!name){ runNotice({ kind:'plus', ballColor:'#22c55e', text:'ใส่ชื่อก่อน', durationMs:500 }); return; }
+      if(!name){ runNotice({ kind:'plus', ballColor:'#22c55e', text:'ใส่ชื่อก่อน', durationMs:DURATION_PLUS }); return; }
       const id = uid();
       state.players.push({ id, name, score: 0 });
       state.selectedId = id;
@@ -518,7 +543,7 @@
     function resetGame(){
       state.players = state.players.map(p=> ({...p, score: 0}));
       save(); render();
-      runNotice({ kind:'plus', ballColor:'#22c55e', text:'เริ่มเกมส์ใหม่', durationMs:500 });
+      runNotice({ kind:'plus', ballColor:'#22c55e', text:'เริ่มเกมส์ใหม่', durationMs:DURATION_PLUS });
     }
 
     function endGame(){
@@ -568,53 +593,57 @@
       runNotice({ kind:'foul', ballColor:RED, barColor:RED, durationMs:DURATION_FOUL, text:'ฟาวล์ -4 (ไม่แจกให้ใคร)' });
     }
 
-    // ===== History delete actions (with pretty confirm) =====
+    // ===== Pretty Confirm Dialog (Promise-based) =====
+    let _confirmResolve = null;
+    function confirmDialog({ title='ยืนยันการลบ', message='ต้องการลบข้อมูลนี้หรือไม่?', okText='ยืนยันลบ', cancelText='ยกเลิก' }={}){
+      qs('#confirmTitle').textContent = title;
+      qs('#confirmMsg').textContent = message;
+      const el = qs('#confirm');
+      el.classList.remove('hidden');
+      return new Promise((resolve)=>{ _confirmResolve = (val)=>{ el.classList.add('hidden'); resolve(val); }; });
+    }
+
+    // ===== History delete actions =====
     async function toggleHistoryEdit(){
       state.historyEditMode = !state.historyEditMode;
       if(!state.historyEditMode) state.selectedHistoryIds.clear();
       render();
     }
     async function deleteAllHistory(){
-      if(state.results.length===0){ runNotice({ kind:'foul', ballColor:RED, barColor:RED, durationMs:600, text:'ยังไม่มีประวัติ' }); return; }
-      const ok = await askConfirm({ title:'ลบประวัติทั้งหมด?', message:'ระบบจะลบเกมทั้งหมดที่บันทึกไว้ และไม่สามารถกู้คืนได้', confirmText:'ลบทั้งหมด' });
-      if(!ok) return closeConfirm(false);
+      if(state.results.length===0) return;
+      const ok = await confirmDialog({ title:'ยืนยันการลบทั้งหมด', message:'ต้องการลบประวัติทั้งหมดหรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้', okText:'ลบทั้งหมด' });
+      if(!ok) return;
       state.results = [];
       state.selectedHistoryIds.clear();
       state.expanded.clear();
       save(); render();
-      closeConfirm(true);
-      runNotice({ kind:'foul', ballColor:RED, barColor:RED, durationMs:600, text:'ลบทั้งหมดแล้ว' });
     }
     async function deleteSelectedHistory(){
       const n = state.selectedHistoryIds.size;
-      if(n===0){ runNotice({ kind:'foul', ballColor:RED, barColor:RED, durationMs:600, text:'ยังไม่ได้เลือกรายการ' }); return; }
-      const ok = await askConfirm({ title:'ลบรายการที่เลือก?', message:`คุณเลือก ${n} รายการ ต้องการลบหรือไม่`, confirmText:'ลบที่เลือก' });
-      if(!ok) return closeConfirm(false);
+      if(n===0) return;
+      const ok = await confirmDialog({ title:'ยืนยันการลบ', message:`ต้องการลบ ${n} รายการที่เลือกหรือไม่?`, okText:'ลบที่เลือก' });
+      if(!ok) return;
       state.results = removeEntriesByIds(state.results, state.selectedHistoryIds);
       cleanupExpanded();
       state.selectedHistoryIds.clear();
       save(); render();
-      closeConfirm(true);
-      runNotice({ kind:'foul', ballColor:RED, barColor:RED, durationMs:600, text:'ลบแล้ว' });
     }
     async function deleteHistoryItem(id){
-      const ok = await askConfirm({ title:'ลบรายการนี้?', message:'ยืนยันลบประวัติเกมนี้หรือไม่', confirmText:'ลบรายการนี้' });
-      if(!ok) return closeConfirm(false);
+      const ok = await confirmDialog({ title:'ยืนยันการลบ', message:'ต้องการลบรายการนี้หรือไม่?', okText:'ลบรายการนี้' });
+      if(!ok) return;
       state.results = state.results.filter(r=> r.id!==id);
       state.selectedHistoryIds.delete(id);
       state.expanded.delete(id);
       save(); render();
-      closeConfirm(true);
-      runNotice({ kind:'foul', ballColor:RED, barColor:RED, durationMs:600, text:'ลบแล้ว' });
     }
 
     // ===== Modal helpers =====
     function showModal(title, message){
-      $('#modalTitle').textContent = title;
-      $('#modalMsg').textContent = message;
-      $('#modal').classList.remove('hidden');
+      qs('#modalTitle').textContent = title;
+      qs('#modalMsg').textContent = message;
+      qs('#modal').classList.remove('hidden');
     }
-    function hideModal(){ $('#modal').classList.add('hidden'); }
+    function hideModal(){ qs('#modal').classList.add('hidden'); }
 
     // ===== Fancy interactions =====
     function ripple(el){
@@ -629,7 +658,7 @@
     }
 
     // ===== Events (delegation) =====
-    document.addEventListener('click', (e)=>{
+    document.addEventListener('click', async (e)=>{
       const t = e.target.closest('[data-action]');
       if(!t) return;
       const act = t.getAttribute('data-action');
@@ -650,20 +679,12 @@
         if(state.expanded.has(id)) state.expanded.delete(id); else state.expanded.add(id);
         render();
       }
-      else if(act==='history-edit-toggle'){ toggleHistoryEdit(); }
-      else if(act==='history-delete-all'){ deleteAllHistory(); }
-      else if(act==='history-delete-selected'){ deleteSelectedHistory(); }
-      else if(act==='history-delete-item'){ deleteHistoryItem(t.getAttribute('data-id')); }
-      else if(act==='confirm-yes'){ closeConfirm(true); }
-      else if(act==='confirm-no'){ closeConfirm(false); }
-    });
-
-    // Keyboard shortcuts for confirm
-    document.addEventListener('keydown', (e)=>{
-      const open = !$('#confirm').classList.contains('hidden');
-      if(!open) return;
-      if(e.key==='Escape') closeConfirm(false);
-      if(e.key==='Enter') closeConfirm(true);
+      else if(act==='history-edit-toggle'){ await toggleHistoryEdit(); }
+      else if(act==='history-delete-all'){ await deleteAllHistory(); }
+      else if(act==='history-delete-selected'){ await deleteSelectedHistory(); }
+      else if(act==='history-delete-item'){ await deleteHistoryItem(t.getAttribute('data-id')); }
+      else if(act==='confirm-ok'){ if(_confirmResolve){ _confirmResolve(true); } }
+      else if(act==='confirm-cancel'){ if(_confirmResolve){ _confirmResolve(false); } }
     });
 
     // Select change for history filter & selection
@@ -680,7 +701,11 @@
     });
 
     // Enter to add
-    $('#nameInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') addPlayer(); });
+    qs('#nameInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') addPlayer(); });
+
+    // Recenter on resume / rotate
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) requestAnimationFrame(render); });
+    window.addEventListener('resize', ()=>{ requestAnimationFrame(render); });
 
     // ===== Boot =====
     load();
@@ -705,6 +730,7 @@
       // Filter tests
       t('filter all returns all', ()=>{ const L=[{players:[{id:'a'},{id:'b'}]},{players:[{id:'c'}]}]; const old=state.filter; state.filter={mode:'all'}; const r=filterResults(L); if(r.length!==2) throw new Error('filter all failed'); state.filter=old; });
       t('filter by player id', ()=>{ const L=[{players:[{id:'a'},{id:'b'}]},{players:[{id:'c'}]}]; const old=state.filter; state.filter={mode:'player',playerId:'a'}; const r=filterResults(L); if(r.length!==1) throw new Error('filter player failed'); state.filter=old; });
+      t('filter unknown player returns 0', ()=>{ const L=[{players:[{id:'x'}]},{players:[{id:'y'}]}]; const old=state.filter; state.filter={mode:'player',playerId:'z'}; const r=filterResults(L); if(r.length!==0) throw new Error('filter unknown failed'); state.filter=old; });
 
       // Deletion helpers
       t('removeEntriesByIds works', ()=>{
@@ -714,9 +740,26 @@
         if(R.length!==1 || R[0].id!=='1') throw new Error('removeEntriesByIds failed');
       });
 
+      // Clamp behavior
+      t('clamp truncates positive/negative', ()=>{ if(clamp(3.9)!==3 || clamp(-1.1)!==-1) throw new Error('clamp failed'); });
+
+      // Extra new tests
+      t('computeWinners accepts negative scores', ()=>{ const r = computeWinners([{id:'a',score:-4},{id:'b',score:-2}]); if(r.top!==-2 || r.winnerIds[0]!=='b') throw new Error('negative winner failed'); });
+      t('removeEntriesByIds with empty set keeps length', ()=>{ const A=[{id:'1'},{id:'2'}]; const ids=new Set(); const R=removeEntriesByIds(A, ids); if(R.length!==2) throw new Error('empty set removal failed'); });
+      // New test for rankPlayers: order + competition ranking
+      t('rankPlayers orders and ranks with ties', ()=>{
+        const L=[{id:'a',score:10},{id:'b',score:7},{id:'c',score:7},{id:'d',score:3}];
+        const R=rankPlayers(L);
+        const order=R.map(x=>x.id).join(',');
+        const pos=R.map(x=>x.pos).join(',');
+        if(order!== 'a,b,c,d') throw new Error('order wrong: '+order);
+        if(pos!== '1,2,2,4') throw new Error('ranking wrong: '+pos);
+      });
+
       const el = document.getElementById('testsOut'); if(el) el.textContent = out.join('\n');
       try{ out.forEach(x=> console.log('[TEST]', x)); }catch(_){ }
     })();
+  })();
   </script>
 </body>
 </html>
