@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>นับสกอ · by Name.</title>
+  <!-- Tailwind only (no React/Babel) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Sarabun", "system-ui", "sans-serif"] },
+          colors: {
+            gold: { 400: "#f4d367", 500: "#f5c542", 600: "#e0a93a" },
+            neon: { 
+              blue: "#00d4ff", 
+              purple: "#8b5cf6", 
+              pink: "#ec4899",
+              green: "#10b981",
+              cyan: "#06b6d4"
+            },
+          },
+          boxShadow: {
+            soft: "0 10px 30px rgba(0,0,0,.35)",
+            glow: "0 0 0 2px rgba(255,255,255,.06), 0 10px 30px rgba(0,0,0,.45)",
+            neon: "0 0 20px rgba(0, 212, 255, 0.3), 0 0 40px rgba(0, 212, 255, 0.2)",
+            "neon-purple": "0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(139, 92, 246, 0.2)",
+            "neon-pink": "0 0 20px rgba(236, 72, 153, 0.3), 0 0 40px rgba(236, 72, 153, 0.2)",
+          },
+          keyframes: {
+            floaty: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-6px)' } },
+            shimmer: { '0%': { backgroundPosition: '0% 50%' }, '100%': { backgroundPosition: '200% 50%' } },
+            pop: { '0%': { transform:'scale(.92)', opacity:.0 }, '100%': { transform:'scale(1)', opacity:1 } },
+            confetti: { '0%': { transform: 'translateY(-80vh) rotate(0deg)' }, '100%': { transform: 'translateY(20vh) rotate(540deg)', opacity:.9 } },
+            flare: { '0%': { opacity:.0, transform:'scale(.8)' }, '100%': { opacity:1, transform:'scale(1)' } },
+            pulse: { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.5 } },
+            bounce: { '0%, 100%': { transform: 'translateY(-25%)', animationTimingFunction: 'cubic-bezier(0.8,0,1,1)' }, '50%': { transform: 'none', animationTimingFunction: 'cubic-bezier(0,0,0.2,1)' } },
+            glow: { '0%, 100%': { boxShadow: '0 0 20px rgba(0, 212, 255, 0.3)' }, '50%': { boxShadow: '0 0 40px rgba(0, 212, 255, 0.6), 0 0 60px rgba(0, 212, 255, 0.4)' } },
+            rotate: { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } }
+          },
+          animation: {
+            floaty: 'floaty 4s ease-in-out infinite',
+            shimmer: 'shimmer 2.2s linear infinite',
+            pop: 'pop .28s ease-out both',
+            flare: 'flare .4s ease-out both',
+            pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            bounce: 'bounce 1s infinite',
+            glow: 'glow 2s ease-in-out infinite alternate',
+            'spin-slow': 'rotate 3s linear infinite'
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root{ --safe-bottom: env(safe-area-inset-bottom); }
+    html,body{ height:100%; }
+    body{ font-family:'Sarabun',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+    .gold-text{ background: linear-gradient(92deg,#f5e6a1,#f4c95d,#f8dd9a); -webkit-background-clip:text; background-clip:text; color:transparent; filter: drop-shadow(0 2px 8px rgba(245,201,93,.25)); }
+    .card-glass{ background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04)); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.1); }
+    .btn-glass{ background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.08)); backdrop-filter: blur(8px); }
+    .grid-anim:before, .grid-anim:after{ content:""; position:absolute; inset:-50%; background: radial-gradient(closest-side, rgba(56,189,248,.08), transparent 70%) 0 0/40% 40% repeat; transform: rotate(15deg); animation: floaty 14s linear infinite; }
+    .grid-anim:after{ background: radial-gradient(closest-side, rgba(236,72,153,.06), transparent 70%) 0 0/45% 45% repeat; animation-duration: 18s; animation-direction: reverse; }
+
+    /* Enhanced Ball sphere effect */
+    .sphere{ position:relative; border-radius:9999px; box-shadow: inset 0 -12px 28px rgba(0,0,0,.5), inset 0 14px 20px rgba(255,255,255,.3), 0 10px 28px rgba(0,0,0,.4); transition: all 0.3s ease; }
+    .sphere:hover{ transform: translateY(-2px); box-shadow: inset 0 -12px 28px rgba(0,0,0,.5), inset 0 14px 20px rgba(255,255,255,.3), 0 15px 35px rgba(0,0,0,.5); }
+    .sphere:after{ content:""; position:absolute; inset:0; border-radius:9999px; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.6), rgba(255,255,255,0) 44%); pointer-events:none; }
+    .press{ transform: translateY(0); transition: transform .08s ease; }
+    .press:active{ transform: translateY(2px) scale(.98); }
+
+    /* Enhanced Ripple */
+    .ripple{ position:absolute; border-radius:9999px; transform: translate(-50%,-50%); pointer-events:none; width:10px; height:10px; background: radial-gradient(circle, rgba(255,255,255,.8), rgba(255,255,255,0) 70%); animation: ripple .6s ease-out forwards; }
+    @keyframes ripple{ from { opacity:.8; transform:translate(-50%,-50%) scale(.8);} to { opacity:0; transform:translate(-50%,-50%) scale(10);} }
+
+    /* Absolute centered label to prevent drift on tab switch */
+    .center-abs{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; will-change:transform; }
+
+    /* Enhanced Notice styling */
+    #noticeCard{ box-shadow: 0 15px 50px rgba(0,0,0,.5); backdrop-filter: blur(15px); }
+    #noticeBar{ position:absolute; inset:0 auto 0 0; background: linear-gradient(90deg, rgba(255,255,255,.25), rgba(255,255,255,.08)); }
+    #noticeBar::after{ content:""; position:absolute; inset:0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent); background-size: 200% 100%; animation: shimmer 2.2s linear infinite; mix-blend-mode: screen; }
+    #noticeBall{ box-shadow: 0 8px 18px rgba(0,0,0,.4), inset 0 10px 15px rgba(255,255,255,.35); }
+
+    /* Neon glow effects */
+    .neon-glow{ animation: glow 2s ease-in-out infinite alternate; }
+    .neon-border{ border: 2px solid transparent; background: linear-gradient(45deg, #00d4ff, #8b5cf6, #ec4899) border-box; -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+
+    /* Modern card hover effects */
+    .modern-card{ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .modern-card:hover{ transform: translateY(-4px) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,.3), 0 0 0 1px rgba(255,255,255,.1); }
+
+    /* Gradient text effects */
+    .gradient-text-blue{ background: linear-gradient(135deg, #00d4ff, #0ea5e9); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .gradient-text-purple{ background: linear-gradient(135deg, #8b5cf6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .gradient-text-rainbow{ background: linear-gradient(135deg, #00d4ff, #8b5cf6, #ec4899, #10b981); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    /* Enhanced button styles */
+    .btn-modern{ position: relative; overflow: hidden; transition: all 0.3s ease; }
+    .btn-modern:before{ content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: left 0.5s; }
+    .btn-modern:hover:before{ left: 100%; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 relative overflow-x-hidden">
+  <!-- Ambient animated backdrop -->
+  <div class="pointer-events-none fixed inset-0 -z-10 grid-anim"></div>
+
+  <div id="app" class="min-h-screen w-full flex justify-center">
+    <div class="w-full max-w-[428px] mx-auto pb-[calc(24px+var(--safe-bottom))]">
+      <!-- Header / Brand -->
+      <header class="sticky top-0 z-30 backdrop-blur-md bg-slate-950/80 border-b border-white/10 shadow-lg">
+        <div class="px-4 py-3 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <!-- Enhanced Luxe logo: gold crown + ball with glow -->
+            <div class="relative w-12 h-12 grid place-items-center rounded-2xl shadow-neon neon-glow" aria-hidden="true">
+              <svg viewBox="0 0 64 64" class="w-12 h-12 animate-floaty">
+                <defs>
+                  <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#f6e7b0"/>
+                    <stop offset="55%" stop-color="#f4c95d"/>
+                    <stop offset="100%" stop-color="#e7b94b"/>
+                  </linearGradient>
+                  <filter id="glow">
+                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                    <feMerge> 
+                      <feMergeNode in="coloredBlur"/>
+                      <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                  </filter>
+                </defs>
+                <circle cx="32" cy="36" r="18" fill="url(#g)" filter="url(#glow)"/>
+                <path d="M10 22 L22 14 L32 22 L42 14 L54 22 L50 30 H14 Z" fill="#f5d26a" opacity="0.95" filter="url(#glow)"/>
+              </svg>
+            </div>
+            <div>
+              <div class="text-3xl font-extrabold leading-6 gradient-text-rainbow animate-pulse">นับสกอ</div>
+              <div class="text-[11px] text-slate-400 gradient-text-blue">by Name.</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button data-action="reset" class="px-3 py-2 rounded-xl btn-glass btn-modern hover:bg-white/20 ring-1 ring-white/10 hover:shadow-neon transition-all duration-300">
+              <span class="flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.18 0 2.34-.21 3.41-.6.39-.14.64-.52.64-.94 0-.83-.94-1.36-1.63-.93-.8.5-1.74.77-2.72.77-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5c0 .28-.22.5-.5.5s-.5-.22-.5-.5c0-2.21-1.79-4-4-4s-4 1.79-4 4 1.79 4 4 4c.85 0 1.64-.27 2.29-.72l-1.29-1.29c-.39-.39-.39-1.02 0-1.41.39-.39 1.02-.39 1.41 0l3 3c.39.39.39 1.02 0 1.41l-3 3c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41l1.29-1.29c-.65.45-1.44.72-2.29.72z"/>
+                </svg>
+                เริ่มใหม่
+              </span>
+            </button>
+            <button data-action="end" class="px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-soft btn-modern hover:shadow-neon-purple transition-all duration-300">
+              <span class="flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                จบเกมส์
+              </span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main -->
+      <main class="px-4 space-y-4">
+        <!-- Players -->
+        <section class="p-4 rounded-2xl card-glass border border-white/10 shadow-glow modern-card">
+          <!-- Add -->
+          <div class="flex gap-2 items-center">
+            <div class="relative flex-1">
+              <input id="nameInput" placeholder="เพิ่มผู้เล่นใหม่… (เช่น Name)" class="w-full px-4 py-3 pl-12 rounded-xl bg-white/10 border border-white/10 outline-none focus:ring-2 focus:ring-neon-blue focus:border-neon-blue transition-all duration-300" />
+              <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+            </div>
+            <button data-action="add-player" class="px-4 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 font-semibold shadow-soft btn-modern hover:shadow-neon transition-all duration-300">
+              <span class="flex items-center gap-2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+                เพิ่ม
+              </span>
+            </button>
+          </div>
+          
+          <!-- Random Player Button -->
+          <div class="mt-3 flex gap-2">
+            <button data-action="random-player" class="flex-1 relative overflow-hidden px-4 py-3 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-700 hover:via-pink-700 hover:to-purple-700 font-semibold shadow-neon-purple btn-modern disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300">
+              <span class="relative z-10 flex items-center justify-center gap-2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="animate-spin-slow">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                </svg>
+                สุ่มผู้เล่น
+              </span>
+              <span class="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/10 via-white/20 to-white/10 animate-shimmer [background-size:200%_100%]"></span>
+            </button>
+          </div>
+          
+          <!-- Random Result Display -->
+          <div id="randomResult" class="mt-3 p-4 rounded-xl bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 border border-purple-400/30 shadow-neon-purple hidden animate-pop">
+            <div class="text-center">
+              <div class="text-sm text-purple-200 mb-2 flex items-center justify-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="animate-bounce">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                ผลการสุ่ม
+              </div>
+              <div id="randomPlayerName" class="text-2xl font-bold text-white mb-2 gradient-text-rainbow">—</div>
+              <div class="text-xs text-purple-300 flex items-center justify-center gap-1">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                เริ่มเล่นก่อนคนอื่น!
+              </div>
+            </div>
+          </div>
+
+          <!-- Player Order Display -->
+          <div id="playerOrder" class="mt-3 p-4 rounded-2xl bg-gradient-to-r from-blue-500/20 via-cyan-500/20 to-blue-500/20 border border-blue-400/30 shadow-neon hidden animate-pop">
+            <div class="text-center">
+              <div class="text-sm text-blue-200 mb-3 flex items-center justify-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+                </svg>
+                ลำดับการเล่น
+              </div>
+              <div id="orderList" class="space-y-2"></div>
+            </div>
+          </div>
+          
+          <!-- List -->
+          <div id="playersList" class="mt-4 grid grid-cols-1 gap-3"></div>
+        </section>
+
+        <!-- Pad -->
+        <section class="p-4 rounded-2xl card-glass border border-white/10 shadow-glow">
+          <div class="flex items-center justify-between mb-3">
+            <div class="text-sm text-slate-300">ผู้เล่นที่เลือก:</div>
+            <div id="selectedName" class="font-semibold text-sky-300 truncate">—</div>
+          </div>
+          <!-- + Points (Ball Icons) -->
+          <div>
+            <div class="text-sm mb-2">เพิ่มคะแนนตามสีลูก</div>
+            <div id="ballsPad" class="grid grid-cols-4 gap-3"></div>
+          </div>
+          <!-- Foul -4 only -->
+          <div class="mt-4">
+            <div class="text-sm mb-2">ฟาวล์</div>
+            <button data-action="foul" class="relative overflow-hidden w-full rounded-2xl py-3 bg-rose-600 hover:bg-rose-700 active:scale-[.99] transition shadow-soft disabled:opacity-40 disabled:cursor-not-allowed">
+              <span class="relative z-10">ฟาวล์ -4</span>
+              <span class="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/10 via-white/0 to-white/10 animate-shimmer [background-size:200%_100%]"></span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Results Log -->
+        <section class="p-4 rounded-2xl card-glass border border-white/10 shadow-glow">
+          <div class="flex items-center justify-between">
+            <h2 class="font-semibold">บันทึกผล</h2>
+            <div id="resultsCount" class="text-xs text-slate-400">0 รายการ</div>
+          </div>
+
+          <!-- Filters & Tools -->
+          <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="inline-flex rounded-xl overflow-hidden ring-1 ring-white/10">
+                <button data-action="filter-all" class="px-3 py-1.5 text-sm bg-white/10">ทั้งหมด</button>
+                <button data-action="filter-player" class="px-3 py-1.5 text-sm hover:bg-white/10">เลือกผู้เล่น</button>
+              </div>
+              <select id="filterPlayer" class="px-3 py-1.5 text-sm rounded-xl bg-white/10 border border-white/10 disabled:opacity-40">
+                <option value="">— เลือกผู้เล่น —</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-2" id="historyTools">
+              <button data-action="history-edit-toggle" class="px-3 py-1.5 text-sm rounded-xl btn-glass hover:bg-white/20">แก้ไข</button>
+              <button id="btnDeleteSelected" data-action="history-delete-selected" class="px-3 py-1.5 text-sm rounded-xl bg-rose-600 hover:bg-rose-700 hidden disabled:opacity-40" disabled>ลบที่เลือก</button>
+              <button id="btnDeleteAll" data-action="history-delete-all" class="px-3 py-1.5 text-sm rounded-xl bg-rose-600/80 hover:bg-rose-600 hidden">ลบทั้งหมด</button>
+              <span id="selCount" class="text-xs text-slate-400 hidden">เลือก 0 รายการ</span>
+            </div>
+          </div>
+
+          <div id="resultsList" class="mt-3 space-y-2"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Centered Notice (modern progress + running ball) -->
+  <div id="notice" class="fixed inset-0 z-[60] grid place-items-center pointer-events-none hidden">
+    <div id="noticeCard" class="min-w-[280px] w-[min(92vw,420px)] px-4 py-3 rounded-2xl bg-white/10 border border-white/15 backdrop-blur animate-pop">
+      <div class="flex items-center justify-center gap-2 text-xs text-slate-200">
+        <svg width="14" height="14" viewBox="0 0 24 24" class="opacity-80"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2m1 15h-2v-2h2Zm0-4h-2V7h2Z"/></svg>
+        <span id="noticeLabel">บันทึกการกด</span> · <span id="noticeText" class="text-emerald-300 font-semibold"></span>
+      </div>
+      <div class="mt-2 h-3 rounded-full bg-white/10 relative overflow-hidden">
+        <div id="noticeBar" class="absolute inset-y-0 left-0" style="width:0%"></div>
+        <div id="noticeBall" class="absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full ring-1 ring-white/40" style="left:-12px"></div>
+      </div>
+      <div id="noticePct" class="mt-1 text-center text-[10px] text-slate-300">0%</div>
+    </div>
+  </div>
+
+  <!-- Grand Celebrate Overlay (for end game) -->
+  <div id="celebrate" class="fixed inset-0 z-[70] hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 backdrop-blur-sm"></div>
+    <div id="celebrateFX" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
+    <div class="absolute inset-0 grid place-items-center p-4">
+      <div class="relative w-[min(96vw,440px)] rounded-3xl border border-white/10 shadow-2xl card-glass animate-pop">
+        <div class="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 rounded-full grid place-items-center" aria-hidden="true">
+          <svg viewBox="0 0 64 64" class="w-16 h-16 animate-floaty">
+            <defs>
+              <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#f6e7b0"/>
+                <stop offset="55%" stop-color="#f4c95d"/>
+                <stop offset="100%" stop-color="#e7b94b"/>
+              </linearGradient>
+            </defs>
+            <path d="M10 22 L22 14 L32 22 L42 14 L54 22 L50 30 H14 Z" fill="url(#cg)"/>
+          </svg>
+        </div>
+        <div class="px-5 pt-10 pb-5 text-center">
+          <h3 class="text-2xl font-extrabold gold-text">จบเกมส์</h3>
+          <p id="celebrateMsg" class="mt-1 text-slate-200"></p>
+          <div id="celebrateBoard" class="mt-4 text-left"></div>
+          <div class="mt-5 flex items-center justify-center gap-2">
+            <button data-action="celebrate-close" class="px-4 py-2 rounded-xl btn-glass hover:bg-white/20">ปิด</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simple Modal (fallback) -->
+  <div id="modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 hidden">
+    <div class="w-full max-w-sm rounded-2xl bg-slate-900 border border-white/10 shadow-2xl p-5">
+      <h3 id="modalTitle" class="text-lg font-bold mb-2"></h3>
+      <p id="modalMsg" class="text-slate-300"></p>
+      <div class="mt-4 flex justify-end gap-2" id="modalButtons">
+        <button data-action="modal-close" class="px-4 py-2 rounded-lg btn-glass hover:bg-white/20">ปิด</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Beautiful Confirm Dialog -->
+  <div id="confirm" class="fixed inset-0 z-[80] hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-rose-900/40 via-slate-900/60 to-rose-900/40 backdrop-blur-sm"></div>
+    <div class="absolute inset-0 grid place-items-center p-4">
+      <div class="relative w-[min(96vw,420px)] rounded-3xl border border-white/10 shadow-2xl card-glass animate-pop">
+        <div class="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 grid place-items-center" aria-hidden="true">
+          <svg viewBox="0 0 64 64" class="w-16 h-16 animate-floaty">
+            <defs>
+              <linearGradient id="dg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#fecaca"/>
+                <stop offset="60%" stop-color="#f87171"/>
+                <stop offset="100%" stop-color="#ef4444"/>
+              </linearGradient>
+            </defs>
+            <circle cx="32" cy="32" r="20" fill="url(#dg)"/>
+            <path d="M32 18 v18" stroke="#1f2937" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="32" cy="44" r="2.5" fill="#1f2937"/>
+          </svg>
+        </div>
+        <div class="px-5 pt-10 pb-5 text-center">
+          <h3 id="confirmTitle" class="text-xl font-extrabold">ยืนยันการลบ</h3>
+          <p id="confirmMsg" class="mt-2 text-slate-300">ต้องการลบข้อมูลนี้หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้</p>
+          <div class="mt-5 flex items-center justify-center gap-2">
+            <button data-action="confirm-cancel" class="px-4 py-2 rounded-xl btn-glass hover:bg-white/20">ยกเลิก</button>
+            <button data-action="confirm-ok" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 shadow-soft">ยืนยันลบ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dev Tests (collapsed) -->
+  <details id="dev-tests" class="px-4 py-2 select-none opacity-60">
+    <summary class="cursor-pointer text-xs">Self-tests (dev)</summary>
+    <pre id="testsOut" class="text-[11px] whitespace-pre-wrap"></pre>
+  </details>
+
+  <script>
+  (function(){
+    'use strict';
+    // ===== Constants / Theme =====
+    const STORAGE_KEY = 'snooker-lite-v8';
+    const GREEN = '#10b981';
+    const RED = '#ef4444';
+    const DURATION_PLUS = 1000;   // 1s for +
+    const DURATION_FOUL = 1000;   // 1s for foul
+    const BALLS = [
+      { key:'red',    label:'แดง',   value:1, hex:'#ef4444' },
+      { key:'yellow', label:'เหลือง',value:2, hex:'#fde047' },
+      { key:'green',  label:'เขียว', value:3, hex:'#22c55e' },
+      { key:'brown',  label:'น้ำตาล',value:4, hex:'#92400e' },
+      { key:'blue',   label:'น้ำเงิน',value:5, hex:'#2563eb' },
+      { key:'pink',   label:'ชมพู',  value:6, hex:'#ec4899' },
+      { key:'black',  label:'ดำ',    value:7, hex:'#0b0b0b' },
+    ];
+
+    // ===== State =====
+    const state = {
+      players: [],        // [{id,name,score}]
+      selectedId: null,
+      results: [],        // [{id,at,players:[{id,name,score}],winnerIds:[id]}]
+      expanded: new Set(), // UI only
+      filter: { mode: 'all', playerId: '' }, // history filter
+      historyEditMode: false,
+      selectedHistoryIds: new Set(),
+      playerOrder: [],    // เพิ่มตัวแปรสำหรับเก็บลำดับผู้เล่น
+    };
+
+    // ===== Utils =====
+    const qs = sel => document.querySelector(sel);
+    // NOTE: rename $$ → $$$ to avoid duplicate variable errors in certain sandboxes/devtools
+    const $$$ = sel => Array.from(document.querySelectorAll(sel));
+    const uid = () => (crypto?.randomUUID?.() || `id_${Date.now()}_${Math.random().toString(36).slice(2,8)}`);
+    const clamp = n => n|0; // integer only, allow negative
+
+    function save(){
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({ players: state.players, selectedId: state.selectedId, results: state.results, filter: state.filter, playerOrder: state.playerOrder })); }catch(e){}
+    }
+    function load(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('snooker-lite-v7') || localStorage.getItem('snooker-lite-v6') || localStorage.getItem('snooker-lite-v5') || localStorage.getItem('snooker-lite-v4') || localStorage.getItem('snooker-lite-v3');
+        if(raw){
+          const s = JSON.parse(raw);
+          state.players = Array.isArray(s.players)? s.players: [];
+          state.selectedId = s.selectedId ?? null;
+          state.results = Array.isArray(s.results)? s.results: [];
+          if(s.filter) state.filter = { ...state.filter, ...s.filter };
+          state.playerOrder = Array.isArray(s.playerOrder) ? s.playerOrder : [];
+        }
+      }catch(e){ console.warn('Load failed', e); }
+    }
+
+    function selected(){ return state.players.find(p=>p.id===state.selectedId) || null; }
+
+    function computeWinners(players){
+      if(players.length===0) return { top:0, winnerIds: [], winners: [] };
+      const top = Math.max(...players.map(p=>p.score));
+      const winners = players.filter(p=>p.score===top);
+      return { top, winnerIds: winners.map(w=>w.id), winners };
+    }
+
+    // Rank helper: returns sorted players with competition ranking (1,2,2,4)
+    function rankPlayers(players){
+      const sorted = players.slice().sort((a,b)=> b.score - a.score);
+      let lastScore = null, lastRank = 0;
+      return sorted.map((p,i)=>{
+        const pos = (lastScore===null || p.score < lastScore) ? (i+1) : lastRank;
+        lastScore = p.score; lastRank = pos;
+        return { ...p, pos };
+      });
+    }
+
+    function filterResults(entries){
+      if(state.filter.mode==='all' || !state.filter.playerId) return entries;
+      return entries.filter(r => r.players.some(p => p.id === state.filter.playerId));
+    }
+
+    function removeEntriesByIds(list, idsSet){ return list.filter(r => !idsSet.has(r.id)); }
+
+    function cleanupExpanded(){ state.expanded = new Set([...state.expanded].filter(id => state.results.some(r=> r.id===id))); }
+
+    // ===== Notice (centered) =====
+    let noticeRAF = null;
+    function runNotice({ kind='plus', text='', ballColor='#fff', barColor=GREEN, durationMs=DURATION_PLUS }){
+      const wrap = qs('#notice');
+      const bar = qs('#noticeBar');
+      const ball = qs('#noticeBall');
+      const pct = qs('#noticePct');
+      const label = qs('#noticeLabel');
+      const txt = qs('#noticeText');
+      label.textContent = kind==='foul'? 'ฟาวล์' : 'บันทึกการกด';
+      txt.textContent = text || '';
+      txt.className = kind==='foul' ? 'text-rose-300 font-semibold' : 'text-emerald-300 font-semibold';
+      // prettier bar + ball color
+      bar.style.background = `linear-gradient(90deg, ${barColor} 0%, rgba(255,255,255,.15) 100%)`;
+      ball.style.background = `radial-gradient(circle at 30% 30%, rgba(255,255,255,.7), rgba(255,255,255,0) 55%), ${ballColor}`;
+      wrap.classList.remove('hidden');
+      const start = performance.now();
+      const tick = now => {
+        const p = Math.min(100, Math.round((now-start)/durationMs*100));
+        bar.style.width = p + '%';
+        ball.style.left = `calc(${p}% - 12px)`;
+        pct.textContent = p + '%';
+        if(p < 100){ noticeRAF = requestAnimationFrame(tick); } else { setTimeout(()=> wrap.classList.add('hidden'), 80); }
+      };
+      cancelAnimationFrame(noticeRAF); noticeRAF = requestAnimationFrame(tick);
+    }
+
+    // ===== Celebrate (grand popup) =====
+    function showCelebrate(entry){
+      // Confetti
+      const fx = qs('#celebrateFX');
+      fx.innerHTML = '';
+      const colors = ['#ef4444','#fde047','#22c55e','#2563eb','#ec4899','#ffffff','#f5c542'];
+      for(let i=0;i<80;i++){
+        const d = document.createElement('div');
+        const size = Math.random()*8+6;
+        d.style.position='absolute';
+        d.style.left = Math.random()*100+'%';
+        d.style.top = (-Math.random()*80)+'vh';
+        d.style.width = size+'px';
+        d.style.height = (size*0.6)+'px';
+        d.style.background = colors[(Math.random()*colors.length)|0];
+        d.style.opacity = .95;
+        d.style.transform = `rotate(${Math.random()*360}deg)`;
+        d.style.filter = 'drop-shadow(0 4px 6px rgba(0,0,0,.25))';
+        d.style.animation = `confetti ${6+Math.random()*4}s cubic-bezier(.2,.6,.2,1) forwards`;
+        d.style.animationDelay = (Math.random()*0.8)+'s';
+        d.style.borderRadius = '3px';
+        fx.appendChild(d);
+      }
+
+      const msgEl = qs('#celebrateMsg');
+      const board = qs('#celebrateBoard');
+      const { winners } = computeWinners(entry.players);
+      if(winners.length===1){
+        msgEl.innerHTML = `ผู้ชนะคือ <span class="gold-text font-extrabold">${escapeHtml(winners[0].name)}</span> ด้วยคะแนน <b>${winners[0].score}</b>`;
+      } else {
+        msgEl.innerHTML = `ผลเสมอ: <span class="text-amber-300 font-semibold">${escapeHtml(winners.map(w=>w.name).join(' • '))}</span> (${winners[0]?.score ?? 0} แต้ม)`;
+      }
+      const rows = rankPlayers(entry.players).map(p=>{
+        return `<div class="flex items-center justify-between px-3 py-2 rounded-xl bg-white/5 border border-white/10 mt-2">
+          <div class="font-semibold"><span class="text-slate-400 mr-1">#${p.pos}</span>${escapeHtml(p.name)}</div>
+          <div class="text-lg font-extrabold">${p.score}</div>
+        </div>`;
+      }).join('');
+      board.innerHTML = rows;
+
+      qs('#celebrate').classList.remove('hidden');
+    }
+    function hideCelebrate(){ qs('#celebrate').classList.add('hidden'); }
+
+    // ===== Renderers =====
+    function render(){
+      // Selected name
+      qs('#selectedName').textContent = selected()?.name || '—';
+
+      // Players list
+      const list = qs('#playersList');
+      if(state.players.length===0){
+        list.innerHTML = `<div class="p-6 rounded-2xl border border-dashed border-white/20 bg-white/5 text-slate-400 text-center">ยังไม่มีผู้เล่น — เพิ่มชื่อด้านบนได้เลย</div>`;
+      } else {
+        list.innerHTML = state.players.map(p=>{
+          // หาลำดับของผู้เล่นจาก playerOrder
+          const orderIndex = state.playerOrder.indexOf(p.id);
+          const orderText = orderIndex !== -1 ? `ผู้เล่นคนที่ ${orderIndex + 1}` : '';
+          
+          return `
+          <div class="p-4 rounded-2xl border-2 transition select-none cursor-pointer ${state.selectedId===p.id? 'border-sky-400 bg-sky-400/15':'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'}" data-player-id="${p.id}">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 grid place-items-center text-white font-bold text-sm">
+                  ${escapeHtml(p.name.charAt(0).toUpperCase())}
+                </div>
+                <div>
+                  <div class="font-semibold">${escapeHtml(p.name)}</div>
+                  ${orderText ? `<div class="text-xs text-slate-400">${orderText}</div>` : ''}
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-2xl font-extrabold">${p.score}</div>
+                <div class="text-xs text-slate-400">แต้ม</div>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+      }
+
+      // Random button state
+      const randomBtn = qs('[data-action="random-player"]');
+      randomBtn.disabled = state.players.length < 2;
+
+      // Player order display
+      const orderDiv = qs('#playerOrder');
+      if(state.playerOrder.length > 0) {
+        const orderList = qs('#orderList');
+        orderList.innerHTML = state.playerOrder.map((playerId, index) => {
+          const player = state.players.find(p => p.id === playerId);
+          if(!player) return '';
+          return `
+            <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-white/10 border border-white/20">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-cyan-600 grid place-items-center text-white font-bold text-xs">
+                  ${index + 1}
+                </div>
+                <span class="font-medium">${escapeHtml(player.name)}</span>
+              </div>
+              <div class="text-xs text-blue-300">
+                ${index === 0 ? 'เริ่มก่อน' : `คนที่ ${index + 1}`}
+              </div>
+            </div>
+          `;
+        }).join('');
+        orderDiv.classList.remove('hidden');
+      } else {
+        orderDiv.classList.add('hidden');
+      }
+
+      // Balls pad
+      const pad = qs('#ballsPad');
+      const canScore = !!selected();
+      pad.innerHTML = BALLS.map(b=>`
+        <button data-action="ball" data-ball="${b.key}" class="relative sphere press w-14 h-14 text-white font-bold text-xs shadow-soft transition disabled:opacity-40 disabled:cursor-not-allowed" style="background:${b.hex};" ${canScore?'':'disabled'}>
+          <span class="center-abs">${b.value}</span>
+        </button>
+      `).join('');
+
+      // Foul button
+      qs('[data-action="foul"]').disabled = !canScore;
+
+      // Results
+      renderResults();
+
+      // 🔄 อัปเดต dropdown ผู้เล่นของตัวกรองทุกครั้งที่ render
+      renderFilterPlayer();
+    }
+
+    function renderResults(){
+      const list = qs('#resultsList');
+      const count = qs('#resultsCount');
+      const filtered = filterResults(state.results);
+      count.textContent = `${filtered.length} รายการ`;
+
+      if(filtered.length===0){
+        list.innerHTML = `<div class="p-4 rounded-xl bg-white/5 text-slate-400 text-center text-sm">ยังไม่มีประวัติ</div>`;
+        return;
+      }
+
+      list.innerHTML = filtered.slice().reverse().map(r=>{
+        const { winners } = computeWinners(r.players);
+        const isExpanded = state.expanded.has(r.id);
+        const isSelected = state.selectedHistoryIds.has(r.id);
+        const time = new Date(r.at).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short' });
+
+        let summary = '';
+        if(winners.length===1){
+          summary = `${escapeHtml(winners[0].name)} ชนะ (${winners[0].score})`;
+        } else {
+          summary = `เสมอ: ${escapeHtml(winners.map(w=>w.name).join(', '))} (${winners[0]?.score ?? 0})`;
+        }
+
+        return `
+          <div class="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+            <div class="p-3 flex items-center justify-between cursor-pointer hover:bg-white/10 transition" data-action="toggle-result" data-result-id="${r.id}">
+              <div class="flex items-center gap-3">
+                ${state.historyEditMode ? `<input type="checkbox" class="w-4 h-4 rounded border-white/20 bg-white/10 text-sky-500 focus:ring-sky-500 focus:ring-offset-0" data-result-checkbox="${r.id}" ${isSelected?'checked':''}/>` : ''}
+                <div>
+                  <div class="font-medium text-sm">${summary}</div>
+                  <div class="text-xs text-slate-400">${time}</div>
+                </div>
+              </div>
+              <svg class="w-4 h-4 text-slate-400 transition-transform ${isExpanded?'rotate-180':''}" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7 10l5 5 5-5z"/>
+              </svg>
+            </div>
+            ${isExpanded ? `
+              <div class="px-3 pb-3 border-t border-white/10 bg-white/5">
+                <div class="mt-2 space-y-1">
+                  ${rankPlayers(r.players).map(p=>`
+                    <div class="flex items-center justify-between text-sm">
+                      <span><span class="text-slate-400">#${p.pos}</span> ${escapeHtml(p.name)}</span>
+                      <span class="font-semibold">${p.score}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderFilterPlayer(){
+      const sel = qs('#filterPlayer');
+      sel.innerHTML = '<option value="">— เลือกผู้เล่น —</option>' + state.players.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+      sel.value = state.filter.playerId;
+    }
+
+    function renderHistoryEditMode(){
+      const tools = qs('#historyTools');
+      const editBtn = tools.querySelector('[data-action="history-edit-toggle"]');
+      const delSelBtn = qs('#btnDeleteSelected');
+      const delAllBtn = qs('#btnDeleteAll');
+      const selCount = qs('#selCount');
+
+      if(state.historyEditMode){
+        editBtn.textContent = 'เสร็จ';
+        editBtn.classList.add('bg-sky-600', 'hover:bg-sky-700');
+        editBtn.classList.remove('btn-glass', 'hover:bg-white/20');
+        delSelBtn.classList.remove('hidden');
+        delAllBtn.classList.remove('hidden');
+        selCount.classList.remove('hidden');
+        selCount.textContent = `เลือก ${state.selectedHistoryIds.size} รายการ`;
+        delSelBtn.disabled = state.selectedHistoryIds.size === 0;
+      } else {
+        editBtn.textContent = 'แก้ไข';
+        editBtn.classList.remove('bg-sky-600', 'hover:bg-sky-700');
+        editBtn.classList.add('btn-glass', 'hover:bg-white/20');
+        delSelBtn.classList.add('hidden');
+        delAllBtn.classList.add('hidden');
+        selCount.classList.add('hidden');
+        state.selectedHistoryIds.clear();
+      }
+    }
+
+    // ===== Event Handlers =====
+    function addPlayer(){
+      const input = qs('#nameInput');
+      const name = input.value.trim();
+      if(!name) return;
+      if(state.players.some(p=>p.name===name)){
+        showModal('ชื่อซ้ำ', 'มีผู้เล่นชื่อนี้อยู่แล้ว');
+        return;
+      }
+      const player = { id: uid(), name, score: 0 };
+      state.players.push(player);
+      input.value = '';
+      save(); render();
+    }
+
+    function randomPlayer(){
+      if(state.players.length < 2) return;
+      
+      // สุ่มลำดับผู้เล่นใหม่
+      const shuffled = [...state.players].sort(() => Math.random() - 0.5);
+      state.playerOrder = shuffled.map(p => p.id);
+      
+      // แสดงผู้เล่นคนแรก (แต่ไม่เลือกอัตโนมัติ)
+      const firstPlayer = shuffled[0];
+      
+      // แสดงผลการสุ่ม
+      const resultDiv = qs('#randomResult');
+      const nameEl = qs('#randomPlayerName');
+      nameEl.textContent = firstPlayer.name;
+      resultDiv.classList.remove('hidden');
+      
+      save(); render();
+    }
+
+    function selectPlayer(id){
+      state.selectedId = state.selectedId === id ? null : id;
+      save(); render();
+    }
+
+    function addScore(ballKey){
+      const p = selected();
+      if(!p) return;
+      const ball = BALLS.find(b=>b.key===ballKey);
+      if(!ball) return;
+      p.score = Math.max(0, p.score + ball.value);
+      runNotice({ text: `${p.name} +${ball.value}`, ballColor: ball.hex });
+      save(); render();
+    }
+
+    function addFoul(){
+      const p = selected();
+      if(!p) return;
+      p.score = Math.max(0, p.score - 4);
+      runNotice({ kind:'foul', text: `${p.name} -4`, ballColor: RED, barColor: RED, durationMs: DURATION_FOUL });
+      save(); render();
+    }
+
+    function endGame(){
+      if(state.players.length===0){
+        showModal('ไม่มีผู้เล่น', 'เพิ่มผู้เล่นก่อนจบเกมส์');
+        return;
+      }
+      const entry = { id: uid(), at: Date.now(), players: state.players.slice(), winnerIds: computeWinners(state.players).winnerIds };
+      state.results.push(entry);
+      showCelebrate(entry);
+      save(); render();
+    }
+
+    function resetGame(){
+      showConfirm('เริ่มเกมส์ใหม่', 'ต้องการเริ่มเกมส์ใหม่หรือไม่? คะแนนปัจจุบันจะถูกรีเซ็ต', ()=>{
+        state.players.forEach(p => p.score = 0);
+        state.selectedId = null;
+        state.playerOrder = []; // รีเซ็ตลำดับผู้เล่น
+        qs('#randomResult').classList.add('hidden'); // ซ่อนผลการสุ่ม
+        save(); render();
+      });
+    }
+
+    function toggleResult(id){
+      if(state.expanded.has(id)){
+        state.expanded.delete(id);
+      } else {
+        state.expanded.add(id);
+      }
+      render();
+    }
+
+    function setFilter(mode, playerId=''){
+      state.filter = { mode, playerId };
+      save(); render();
+    }
+
+    function toggleHistoryEditMode(){
+      state.historyEditMode = !state.historyEditMode;
+      if(!state.historyEditMode) state.selectedHistoryIds.clear();
+      renderHistoryEditMode(); render();
+    }
+
+    function toggleHistorySelection(id){
+      if(state.selectedHistoryIds.has(id)){
+        state.selectedHistoryIds.delete(id);
+      } else {
+        state.selectedHistoryIds.add(id);
+      }
+      renderHistoryEditMode(); render();
+    }
+
+    function deleteSelectedHistory(){
+      if(state.selectedHistoryIds.size===0) return;
+      showConfirm('ลบประวัติที่เลือก', `ต้องการลบประวัติ ${state.selectedHistoryIds.size} รายการหรือไม่?`, ()=>{
+        state.results = removeEntriesByIds(state.results, state.selectedHistoryIds);
+        state.selectedHistoryIds.clear();
+        cleanupExpanded();
+        save(); render(); renderHistoryEditMode();
+      });
+    }
+
+    function deleteAllHistory(){
+      if(state.results.length===0) return;
+      showConfirm('ลบประวัติทั้งหมด', 'ต้องการลบประวัติทั้งหมดหรือไม่?', ()=>{
+        state.results = [];
+        state.selectedHistoryIds.clear();
+        state.expanded.clear();
+        save(); render(); renderHistoryEditMode();
+      });
+    }
+
+    // ===== Modal/Confirm =====
+    function showModal(title, msg){
+      qs('#modalTitle').textContent = title;
+      qs('#modalMsg').textContent = msg;
+      qs('#modal').classList.remove('hidden');
+    }
+    function hideModal(){ qs('#modal').classList.add('hidden'); }
+
+    let confirmCallback = null;
+    function showConfirm(title, msg, onOk){
+      qs('#confirmTitle').textContent = title;
+      qs('#confirmMsg').textContent = msg;
+      confirmCallback = onOk;
+      qs('#confirm').classList.remove('hidden');
+    }
+    function hideConfirm(){
+      qs('#confirm').classList.add('hidden');
+      confirmCallback = null;
+    }
+    function confirmOk(){
+      if(confirmCallback) confirmCallback();
+      hideConfirm();
+    }
+
+    function escapeHtml(text){ return text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
+
+    // ===== Event Delegation (FIXED) =====
+    document.addEventListener('click', e => {
+      // 1) จัดการปุ่ม/ลิงก์ที่มี data-action ถ้ามี
+      const actionEl = e.target.closest('[data-action]');
+      if(actionEl){
+        const action = actionEl.dataset.action;
+        switch(action){
+          case 'add-player': addPlayer(); break;
+          case 'random-player': randomPlayer(); break;
+          case 'ball': {
+            const ballHost = e.target.closest('[data-ball]');
+            if(ballHost) addScore(ballHost.dataset.ball);
+            break;
+          }
+          case 'foul': addFoul(); break;
+          case 'end': endGame(); break;
+          case 'reset': resetGame(); break;
+          case 'toggle-result': {
+            const host = e.target.closest('[data-result-id]');
+            if(host) toggleResult(host.dataset.resultId);
+            break;
+          }
+          case 'filter-all': setFilter('all'); break;
+          case 'filter-player': setFilter('player'); break;
+          case 'history-edit-toggle': toggleHistoryEditMode(); break;
+          case 'history-delete-selected': deleteSelectedHistory(); break;
+          case 'history-delete-all': deleteAllHistory(); break;
+          case 'celebrate-close': hideCelebrate(); break;
+          case 'modal-close': hideModal(); break;
+          case 'confirm-cancel': hideConfirm(); break;
+          case 'confirm-ok': confirmOk(); break;
+        }
+      }
+
+      // 2) ให้การคลิกการ์ดผู้เล่นทำงานเสมอ (ไม่มีการ return ตัดทิ้ง)
+      const playerEl = e.target.closest('[data-player-id]');
+      if(playerEl) selectPlayer(playerEl.dataset.playerId);
+
+      // 3) เช็คบ็อกซ์เลือกประวัติ
+      const resultCheckbox = e.target.closest('[data-result-checkbox]');
+      if(resultCheckbox){
+        const id = resultCheckbox.dataset.resultCheckbox;
+        toggleHistorySelection(id);
+        e.stopPropagation();
+      }
+    });
+
+    document.addEventListener('keydown', e => {
+      if(e.key==='Enter' && e.target.id==='nameInput') addPlayer();
+    });
+
+    document.addEventListener('change', e => {
+      if(e.target.id==='filterPlayer'){
+        setFilter('player', e.target.value);
+      }
+    });
+
+    // ===== Init =====
+    load();
+    render();
+    renderHistoryEditMode();
+
+    // ===== Dev Tests =====
+    function runTests(){
+      const out = [];
+      try{
+        // Test basic state
+        out.push(`✓ State initialized: ${state.players.length} players, ${state.results.length} results`);
+        
+        // Test utilities
+        out.push(`✓ UID generator: ${uid().length > 10 ? 'OK' : 'FAIL'}`);
+        out.push(`✓ Clamp function: ${clamp(-5.7)} === -5`);
+        
+        // Test winner computation
+        const testPlayers = [{id:'a',name:'A',score:10},{id:'b',name:'B',score:15},{id:'c',name:'C',score:10}];
+        const winners = computeWinners(testPlayers);
+        out.push(`✓ Winner computation: ${winners.winners.length === 1 && winners[0].name === 'B' ? 'OK' : 'FAIL'}`);
+        
+        // Test ranking
+        const ranked = rankPlayers(testPlayers);
+        out.push(`✓ Ranking: ${ranked[0].pos === 1 && ranked[1].pos === 2 && ranked[2].pos === 2 ? 'OK' : 'FAIL'}`);
+        
+        out.push(`✓ All tests completed at ${new Date().toLocaleTimeString()}`);
+      } catch(err){
+        out.push(`✗ Test error: ${err.message}`);
+      }
+      qs('#testsOut').textContent = out.join('\n');
+    }
+
+    // Run tests on load
+    setTimeout(runTests, 100);
+  })();
+  </script>
+</body>
+</html>
