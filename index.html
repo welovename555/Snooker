@@ -2,7 +2,8 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <!-- ✅ กันการซูม: ปิด pinch/double-tap zoom -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <title>นับสกอ · by Name.</title>
   <!-- Tailwind only (no React/Babel) -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -58,49 +59,46 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root{ --safe-bottom: env(safe-area-inset-bottom); }
-    html,body{ height:100%; }
+    html,body{ height:100%; touch-action: manipulation; overscroll-behavior: none; }
+    *{ -webkit-tap-highlight-color: transparent; }
     body{ font-family:'Sarabun',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
     .gold-text{ background: linear-gradient(92deg,#f5e6a1,#f4c95d,#f8dd9a); -webkit-background-clip:text; background-clip:text; color:transparent; filter: drop-shadow(0 2px 8px rgba(245,201,93,.25)); }
     .card-glass{ background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04)); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.1); }
     .btn-glass{ background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.08)); backdrop-filter: blur(8px); }
-    .grid-anim:before, .grid-anim:after{ content:""; position:absolute; inset:-50%; background: radial-gradient(closest-side, rgba(56,189,248,.08), transparent 70%) 0 0/40% 40% repeat; transform: rotate(15deg); animation: floaty 14s linear infinite; }
+    .grid-anim:before, .grid-anim:after{ content:""; position:absolute; inset:-50%; background: radial-gradient(closest-side, rgba(56,189,248,.08), transparent 70%) 0 0/40% 40% repeat; transform: rotate(15deg); animation: floaty 14s linear infinite; will-change: transform, opacity; transform: translateZ(0); }
     .grid-anim:after{ background: radial-gradient(closest-side, rgba(236,72,153,.06), transparent 70%) 0 0/45% 45% repeat; animation-duration: 18s; animation-direction: reverse; }
 
-    /* Enhanced Ball sphere effect */
-    .sphere{ position:relative; border-radius:9999px; box-shadow: inset 0 -12px 28px rgba(0,0,0,.5), inset 0 14px 20px rgba(255,255,255,.3), 0 10px 28px rgba(0,0,0,.4); transition: all 0.3s ease; }
-    .sphere:hover{ transform: translateY(-2px); box-shadow: inset 0 -12px 28px rgba(0,0,0,.5), inset 0 14px 20px rgba(255,255,255,.3), 0 15px 35px rgba(0,0,0,.5); }
+    /* Enhanced Ball sphere effect (GPU-friendly) */
+    .sphere{ position:relative; border-radius:9999px; box-shadow: inset 0 -12px 28px rgba(0,0,0,.5), inset 0 14px 20px rgba(255,255,255,.3), 0 10px 28px rgba(0,0,0,.4); transition: transform .3s ease; backface-visibility:hidden; will-change: transform; transform: translateZ(0); }
+    .sphere:hover{ transform: translate3d(0,-2px,0); }
     .sphere:after{ content:""; position:absolute; inset:0; border-radius:9999px; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.6), rgba(255,255,255,0) 44%); pointer-events:none; }
-    .press{ transform: translateY(0); transition: transform .08s ease; }
-    .press:active{ transform: translateY(2px) scale(.98); }
+    .press{ transform: translateZ(0); transition: transform .08s ease; will-change: transform; }
+    .press:active{ transform: translate3d(0,2px,0) scale(.98); }
 
-    /* Enhanced Ripple */
+    /* Ripple */
     .ripple{ position:absolute; border-radius:9999px; transform: translate(-50%,-50%); pointer-events:none; width:10px; height:10px; background: radial-gradient(circle, rgba(255,255,255,.8), rgba(255,255,255,0) 70%); animation: ripple .6s ease-out forwards; }
     @keyframes ripple{ from { opacity:.8; transform:translate(-50%,-50%) scale(.8);} to { opacity:0; transform:translate(-50%,-50%) scale(10);} }
 
-    /* Absolute centered label to prevent drift on tab switch */
+    /* Absolute centered label */
     .center-abs{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; will-change:transform; }
 
-    /* Enhanced Notice styling */
+    /* Notice styling (GPU progress) */
     #noticeCard{ box-shadow: 0 15px 50px rgba(0,0,0,.5); backdrop-filter: blur(15px); }
-    #noticeBar{ position:absolute; inset:0 auto 0 0; background: linear-gradient(90deg, rgba(255,255,255,.25), rgba(255,255,255,.08)); }
-    #noticeBar::after{ content:""; position:absolute; inset:0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent); background-size: 200% 100%; animation: shimmer 2.2s linear infinite; mix-blend-mode: screen; }
-    #noticeBall{ box-shadow: 0 8px 18px rgba(0,0,0,.4), inset 0 10px 15px rgba(255,255,255,.35); }
+    #noticeBar{ position:absolute; inset:0 auto 0 0; transform-origin: left center; will-change: transform; transform: scaleX(0); }
+    #noticeBall{ box-shadow: 0 8px 18px rgba(0,0,0,.4), inset 0 10px 15px rgba(255,255,255,.35); will-change: transform; transform: translateX(0); }
 
     /* Neon glow effects */
     .neon-glow{ animation: glow 2s ease-in-out infinite alternate; }
     .neon-border{ border: 2px solid transparent; background: linear-gradient(45deg, #00d4ff, #8b5cf6, #ec4899) border-box; -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
 
-    /* Modern card hover effects */
-    .modern-card{ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .modern-card{ transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow .3s; will-change: transform; }
     .modern-card:hover{ transform: translateY(-4px) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,.3), 0 0 0 1px rgba(255,255,255,.1); }
 
-    /* Gradient text effects */
     .gradient-text-blue{ background: linear-gradient(135deg, #00d4ff, #0ea5e9); -webkit-background-clip: text; background-clip: text; color: transparent; }
     .gradient-text-purple{ background: linear-gradient(135deg, #8b5cf6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; }
     .gradient-text-rainbow{ background: linear-gradient(135deg, #00d4ff, #8b5cf6, #ec4899, #10b981); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
-    /* Enhanced button styles */
-    .btn-modern{ position: relative; overflow: hidden; transition: all 0.3s ease; }
+    .btn-modern{ position: relative; overflow: hidden; transition: transform .3s ease; will-change: transform; }
     .btn-modern:before{ content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: left 0.5s; }
     .btn-modern:hover:before{ left: 100%; }
   </style>
@@ -115,7 +113,6 @@
       <header class="sticky top-0 z-30 backdrop-blur-md bg-slate-950/80 border-b border-white/10 shadow-lg">
         <div class="px-4 py-3 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <!-- Enhanced Luxe logo: gold crown + ball with glow -->
             <div class="relative w-12 h-12 grid place-items-center rounded-2xl shadow-neon neon-glow" aria-hidden="true">
               <svg viewBox="0 0 64 64" class="w-12 h-12 animate-floaty">
                 <defs>
@@ -145,7 +142,7 @@
             <button data-action="reset" class="px-3 py-2 rounded-xl btn-glass btn-modern hover:bg-white/20 ring-1 ring-white/10 hover:shadow-neon transition-all duration-300">
               <span class="flex items-center gap-2">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.18 0 2.34-.21 3.41-.6.39-.14.64-.52.64-.94 0-.83-.94-1.36-1.63-.93-.8.5-1.74.77-2.72.77-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5c0 .28-.22.5-.5.5s-.5-.22-.5-.5c0-2.21-1.79-4-4-4s-4 1.79-4 4 1.79 4 4 4c.85 0 1.64-.27 2.29-.72l-1.29-1.29c-.39-.39-.39-1.02 0-1.41.39-.39 1.02-.39 1.41 0l3 3c.39.39.39 1.02 0 1.41l-3 3c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41l1.29-1.29c-.65.45-1.44.72-2.29.72z"/>
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.18 0 2.34-.21 3.41-.6.39-.14.64-.52.64-.94 0-.83-.94-1.36-1.63-.93-.8.5-1.74.77-2.72.77-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5c0 .28-.22.5-.5.5s-.5-.22-.5-.5c0-2.21-1.79-4-4-4s-4 1.79-4 4 1.79 4 4 4c.85 0 1.64-.27 2.29-.72l-1.29-1.29c-.39-.39-.39-1.02 0-1.41.39-.39 1.02-.39 1.41 0l3 3c.39.39.39 1.02 0 1.41ล-3 3c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41l1.29-1.29c-.65.45-1.44.72-2.29.72z"/>
                 </svg>
                 เริ่มใหม่
               </span>
@@ -286,22 +283,23 @@
     </div>
   </div>
 
-  <!-- Centered Notice (modern progress + running ball) -->
+  <!-- Centered Notice -->
   <div id="notice" class="fixed inset-0 z-[60] grid place-items-center pointer-events-none hidden">
     <div id="noticeCard" class="min-w-[280px] w-[min(92vw,420px)] px-4 py-3 rounded-2xl bg-white/10 border border-white/15 backdrop-blur animate-pop">
       <div class="flex items-center justify-center gap-2 text-xs text-slate-200">
         <svg width="14" height="14" viewBox="0 0 24 24" class="opacity-80"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2m1 15h-2v-2h2Zm0-4h-2V7h2Z"/></svg>
         <span id="noticeLabel">บันทึกการกด</span> · <span id="noticeText" class="text-emerald-300 font-semibold"></span>
       </div>
-      <div class="mt-2 h-3 rounded-full bg-white/10 relative overflow-hidden">
-        <div id="noticeBar" class="absolute inset-y-0 left-0" style="width:0%"></div>
-        <div id="noticeBall" class="absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full ring-1 ring-white/40" style="left:-12px"></div>
+      <div id="noticeTrack" class="mt-2 h-3 rounded-full bg-white/10 relative overflow-hidden">
+        <!-- ✅ ความกว้าง 100% ใช้ transform: scaleX เพื่อความลื่น -->
+        <div id="noticeBar" class="absolute inset-y-0 left-0" style="width:100%"></div>
+        <div id="noticeBall" class="absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full ring-1 ring-white/40" style="left:0; transform: translateX(0)"></div>
       </div>
       <div id="noticePct" class="mt-1 text-center text-[10px] text-slate-300">0%</div>
     </div>
   </div>
 
-  <!-- Grand Celebrate Overlay (for end game) -->
+  <!-- Grand Celebrate Overlay -->
   <div id="celebrate" class="fixed inset-0 z-[70] hidden">
     <div class="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 backdrop-blur-sm"></div>
     <div id="celebrateFX" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
@@ -331,7 +329,7 @@
     </div>
   </div>
 
-  <!-- Simple Modal (fallback) -->
+  <!-- Simple Modal -->
   <div id="modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm grid place-items-center p-4 hidden">
     <div class="w-full max-w-sm rounded-2xl bg-slate-900 border border-white/10 shadow-2xl p-5">
       <h3 id="modalTitle" class="text-lg font-bold mb-2"></h3>
@@ -373,13 +371,30 @@
     </div>
   </div>
 
-  <!-- Dev Tests (collapsed) -->
+  <!-- Dev Tests -->
   <details id="dev-tests" class="px-4 py-2 select-none opacity-60">
     <summary class="cursor-pointer text-xs">Self-tests (dev)</summary>
     <pre id="testsOut" class="text-[11px] whitespace-pre-wrap"></pre>
   </details>
 
   <script>
+  // ===== ป้องกันการซูมแบบครอบจักรวาล (pinch/ctrl+wheel/dblclick/คีย์ลัด) =====
+  (function preventZoom(){
+    const stop = e => { e.preventDefault(); };
+    // iOS Safari gestures
+    document.addEventListener('gesturestart', stop, { passive:false });
+    document.addEventListener('gesturechange', stop, { passive:false });
+    document.addEventListener('gestureend', stop, { passive:false });
+    // Ctrl/Cmd + mousewheel zoom
+    window.addEventListener('wheel', e => { if(e.ctrlKey) e.preventDefault(); }, { passive:false });
+    // Keyboard zoom shortcuts
+    window.addEventListener('keydown', e => {
+      if((e.ctrlKey || e.metaKey) && ['=','+','-','0'].includes(e.key)) e.preventDefault();
+    }, { passive:false });
+    // Double-tap/dblclick zoom
+    document.addEventListener('dblclick', stop, { passive:false });
+  })();
+
   (function(){
     'use strict';
     // ===== Constants / Theme =====
@@ -407,15 +422,14 @@
       filter: { mode: 'all', playerId: '' }, // history filter
       historyEditMode: false,
       selectedHistoryIds: new Set(),
-      playerOrder: [],    // เพิ่มตัวแปรสำหรับเก็บลำดับผู้เล่น
+      playerOrder: [],    // ลำดับผู้เล่นหลังสุ่ม
     };
 
     // ===== Utils =====
     const qs = sel => document.querySelector(sel);
-    // NOTE: rename $$ → $$$ to avoid duplicate variable errors in certain sandboxes/devtools
     const $$$ = sel => Array.from(document.querySelectorAll(sel));
     const uid = () => (crypto?.randomUUID?.() || `id_${Date.now()}_${Math.random().toString(36).slice(2,8)}`);
-    const clamp = n => n|0; // integer only, allow negative
+    const clamp = n => n|0; // integer only
 
     function save(){
       try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({ players: state.players, selectedId: state.selectedId, results: state.results, filter: state.filter, playerOrder: state.playerOrder })); }catch(e){}
@@ -443,7 +457,7 @@
       return { top, winnerIds: winners.map(w=>w.id), winners };
     }
 
-    // Rank helper: returns sorted players with competition ranking (1,2,2,4)
+    // Rank helper
     function rankPlayers(players){
       const sorted = players.slice().sort((a,b)=> b.score - a.score);
       let lastScore = null, lastRank = 0;
@@ -460,10 +474,9 @@
     }
 
     function removeEntriesByIds(list, idsSet){ return list.filter(r => !idsSet.has(r.id)); }
-
     function cleanupExpanded(){ state.expanded = new Set([...state.expanded].filter(id => state.results.some(r=> r.id===id))); }
 
-    // ===== Notice (centered) =====
+    // ===== Notice (centered) — optimized with transform for high FPS =====
     let noticeRAF = null;
     function runNotice({ kind='plus', text='', ballColor='#fff', barColor=GREEN, durationMs=DURATION_PLUS }){
       const wrap = qs('#notice');
@@ -472,27 +485,31 @@
       const pct = qs('#noticePct');
       const label = qs('#noticeLabel');
       const txt = qs('#noticeText');
+      const track = qs('#noticeTrack');
+      const trackW = track.clientWidth; // measure once
+
       label.textContent = kind==='foul'? 'ฟาวล์' : 'บันทึกการกด';
       txt.textContent = text || '';
       txt.className = kind==='foul' ? 'text-rose-300 font-semibold' : 'text-emerald-300 font-semibold';
-      // prettier bar + ball color
       bar.style.background = `linear-gradient(90deg, ${barColor} 0%, rgba(255,255,255,.15) 100%)`;
       ball.style.background = `radial-gradient(circle at 30% 30%, rgba(255,255,255,.7), rgba(255,255,255,0) 55%), ${ballColor}`;
       wrap.classList.remove('hidden');
+
       const start = performance.now();
       const tick = now => {
         const p = Math.min(100, Math.round((now-start)/durationMs*100));
-        bar.style.width = p + '%';
-        ball.style.left = `calc(${p}% - 12px)`;
+        // ✅ ใช้ transform แทน width/left → ลื่นขึ้น
+        bar.style.transform = `scaleX(${p/100})`;
+        const px = (p/100)*trackW - 12;
+        ball.style.transform = `translateX(${px}px)`;
         pct.textContent = p + '%';
         if(p < 100){ noticeRAF = requestAnimationFrame(tick); } else { setTimeout(()=> wrap.classList.add('hidden'), 80); }
       };
       cancelAnimationFrame(noticeRAF); noticeRAF = requestAnimationFrame(tick);
     }
 
-    // ===== Celebrate (grand popup) =====
+    // ===== Celebrate =====
     function showCelebrate(entry){
-      // Confetti
       const fx = qs('#celebrateFX');
       fx.innerHTML = '';
       const colors = ['#ef4444','#fde047','#22c55e','#2563eb','#ec4899','#ffffff','#f5c542'];
@@ -506,7 +523,7 @@
         d.style.height = (size*0.6)+'px';
         d.style.background = colors[(Math.random()*colors.length)|0];
         d.style.opacity = .95;
-        d.style.transform = `rotate(${Math.random()*360}deg)`;
+        d.style.transform = `rotate(${Math.random()*360}deg) translateZ(0)`;
         d.style.filter = 'drop-shadow(0 4px 6px rgba(0,0,0,.25))';
         d.style.animation = `confetti ${6+Math.random()*4}s cubic-bezier(.2,.6,.2,1) forwards`;
         d.style.animationDelay = (Math.random()*0.8)+'s';
@@ -545,10 +562,8 @@
         list.innerHTML = `<div class="p-6 rounded-2xl border border-dashed border-white/20 bg-white/5 text-slate-400 text-center">ยังไม่มีผู้เล่น — เพิ่มชื่อด้านบนได้เลย</div>`;
       } else {
         list.innerHTML = state.players.map(p=>{
-          // หาลำดับของผู้เล่นจาก playerOrder
           const orderIndex = state.playerOrder.indexOf(p.id);
           const orderText = orderIndex !== -1 ? `ผู้เล่นคนที่ ${orderIndex + 1}` : '';
-          
           return `
           <div class="p-4 rounded-2xl border-2 transition select-none cursor-pointer ${state.selectedId===p.id? 'border-sky-400 bg-sky-400/15':'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'}" data-player-id="${p.id}">
             <div class="flex items-center justify-between">
@@ -571,8 +586,7 @@
       }
 
       // Random button state
-      const randomBtn = qs('[data-action="random-player"]');
-      randomBtn.disabled = state.players.length < 2;
+      qs('[data-action="random-player"]').disabled = state.players.length < 2;
 
       // Player order display
       const orderDiv = qs('#playerOrder');
@@ -614,9 +628,7 @@
 
       // Results
       renderResults();
-
-      // 🔄 อัปเดต dropdown ผู้เล่นของตัวกรองทุกครั้งที่ render
-      renderFilterPlayer();
+      renderFilterPlayer(); // keep filter list fresh
     }
 
     function renderResults(){
@@ -724,20 +736,13 @@
 
     function randomPlayer(){
       if(state.players.length < 2) return;
-      
-      // สุ่มลำดับผู้เล่นใหม่
       const shuffled = [...state.players].sort(() => Math.random() - 0.5);
       state.playerOrder = shuffled.map(p => p.id);
-      
-      // แสดงผู้เล่นคนแรก (แต่ไม่เลือกอัตโนมัติ)
       const firstPlayer = shuffled[0];
-      
-      // แสดงผลการสุ่ม
       const resultDiv = qs('#randomResult');
       const nameEl = qs('#randomPlayerName');
       nameEl.textContent = firstPlayer.name;
       resultDiv.classList.remove('hidden');
-      
       save(); render();
     }
 
@@ -746,12 +751,13 @@
       save(); render();
     }
 
+    // ✅ คะแนนสามารถติดลบได้แล้ว (เอา Math.max ออก)
     function addScore(ballKey){
       const p = selected();
       if(!p) return;
       const ball = BALLS.find(b=>b.key===ballKey);
       if(!ball) return;
-      p.score = Math.max(0, p.score + ball.value);
+      p.score = p.score + ball.value;
       runNotice({ text: `${p.name} +${ball.value}`, ballColor: ball.hex });
       save(); render();
     }
@@ -759,7 +765,7 @@
     function addFoul(){
       const p = selected();
       if(!p) return;
-      p.score = Math.max(0, p.score - 4);
+      p.score = p.score - 4;
       runNotice({ kind:'foul', text: `${p.name} -4`, ballColor: RED, barColor: RED, durationMs: DURATION_FOUL });
       save(); render();
     }
@@ -779,18 +785,15 @@
       showConfirm('เริ่มเกมส์ใหม่', 'ต้องการเริ่มเกมส์ใหม่หรือไม่? คะแนนปัจจุบันจะถูกรีเซ็ต', ()=>{
         state.players.forEach(p => p.score = 0);
         state.selectedId = null;
-        state.playerOrder = []; // รีเซ็ตลำดับผู้เล่น
-        qs('#randomResult').classList.add('hidden'); // ซ่อนผลการสุ่ม
+        state.playerOrder = [];
+        qs('#randomResult').classList.add('hidden');
         save(); render();
       });
     }
 
     function toggleResult(id){
-      if(state.expanded.has(id)){
-        state.expanded.delete(id);
-      } else {
-        state.expanded.add(id);
-      }
+      if(state.expanded.has(id)) state.expanded.delete(id);
+      else state.expanded.add(id);
       render();
     }
 
@@ -806,11 +809,8 @@
     }
 
     function toggleHistorySelection(id){
-      if(state.selectedHistoryIds.has(id)){
-        state.selectedHistoryIds.delete(id);
-      } else {
-        state.selectedHistoryIds.add(id);
-      }
+      if(state.selectedHistoryIds.has(id)) state.selectedHistoryIds.delete(id);
+      else state.selectedHistoryIds.add(id);
       renderHistoryEditMode(); render();
     }
 
@@ -860,9 +860,8 @@
 
     function escapeHtml(text){ return text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
 
-    // ===== Event Delegation (FIXED) =====
+    // ===== Event Delegation (keeps player click working) =====
     document.addEventListener('click', e => {
-      // 1) จัดการปุ่ม/ลิงก์ที่มี data-action ถ้ามี
       const actionEl = e.target.closest('[data-action]');
       if(actionEl){
         const action = actionEl.dataset.action;
@@ -894,11 +893,9 @@
         }
       }
 
-      // 2) ให้การคลิกการ์ดผู้เล่นทำงานเสมอ (ไม่มีการ return ตัดทิ้ง)
       const playerEl = e.target.closest('[data-player-id]');
       if(playerEl) selectPlayer(playerEl.dataset.playerId);
 
-      // 3) เช็คบ็อกซ์เลือกประวัติ
       const resultCheckbox = e.target.closest('[data-result-checkbox]');
       if(resultCheckbox){
         const id = resultCheckbox.dataset.resultCheckbox;
@@ -926,30 +923,20 @@
     function runTests(){
       const out = [];
       try{
-        // Test basic state
         out.push(`✓ State initialized: ${state.players.length} players, ${state.results.length} results`);
-        
-        // Test utilities
         out.push(`✓ UID generator: ${uid().length > 10 ? 'OK' : 'FAIL'}`);
         out.push(`✓ Clamp function: ${clamp(-5.7)} === -5`);
-        
-        // Test winner computation
         const testPlayers = [{id:'a',name:'A',score:10},{id:'b',name:'B',score:15},{id:'c',name:'C',score:10}];
         const winners = computeWinners(testPlayers);
-        out.push(`✓ Winner computation: ${winners.winners.length === 1 && winners[0].name === 'B' ? 'OK' : 'FAIL'}`);
-        
-        // Test ranking
+        out.push(`✓ Winner computation: ${winners.winners.length === 1 && winners.winners[0].name === 'B' ? 'OK' : 'FAIL'}`);
         const ranked = rankPlayers(testPlayers);
         out.push(`✓ Ranking: ${ranked[0].pos === 1 && ranked[1].pos === 2 && ranked[2].pos === 2 ? 'OK' : 'FAIL'}`);
-        
         out.push(`✓ All tests completed at ${new Date().toLocaleTimeString()}`);
       } catch(err){
         out.push(`✗ Test error: ${err.message}`);
       }
       qs('#testsOut').textContent = out.join('\n');
     }
-
-    // Run tests on load
     setTimeout(runTests, 100);
   })();
   </script>
