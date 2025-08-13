@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <!-- ✅ กันการซูม: ปิด pinch/double-tap zoom -->
+  <!-- กันการซูม: ปิด pinch/double-tap zoom -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <title>นับสกอ · by Name.</title>
   <!-- Tailwind only (no React/Babel) -->
@@ -68,26 +68,22 @@
     .grid-anim:before, .grid-anim:after{ content:""; position:absolute; inset:-50%; background: radial-gradient(closest-side, rgba(56,189,248,.08), transparent 70%) 0 0/40% 40% repeat; transform: rotate(15deg); animation: floaty 14s linear infinite; will-change: transform, opacity; transform: translateZ(0); }
     .grid-anim:after{ background: radial-gradient(closest-side, rgba(236,72,153,.06), transparent 70%) 0 0/45% 45% repeat; animation-duration: 18s; animation-direction: reverse; }
 
-    /* Enhanced Ball sphere effect (GPU-friendly) */
+    /* GPU-friendly */
     .sphere{ position:relative; border-radius:9999px; box-shadow: inset 0 -12px 28px rgba(0,0,0,.5), inset 0 14px 20px rgba(255,255,255,.3), 0 10px 28px rgba(0,0,0,.4); transition: transform .3s ease; backface-visibility:hidden; will-change: transform; transform: translateZ(0); }
     .sphere:hover{ transform: translate3d(0,-2px,0); }
     .sphere:after{ content:""; position:absolute; inset:0; border-radius:9999px; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.6), rgba(255,255,255,0) 44%); pointer-events:none; }
     .press{ transform: translateZ(0); transition: transform .08s ease; will-change: transform; }
     .press:active{ transform: translate3d(0,2px,0) scale(.98); }
 
-    /* Ripple */
     .ripple{ position:absolute; border-radius:9999px; transform: translate(-50%,-50%); pointer-events:none; width:10px; height:10px; background: radial-gradient(circle, rgba(255,255,255,.8), rgba(255,255,255,0) 70%); animation: ripple .6s ease-out forwards; }
     @keyframes ripple{ from { opacity:.8; transform:translate(-50%,-50%) scale(.8);} to { opacity:0; transform:translate(-50%,-50%) scale(10);} }
 
-    /* Absolute centered label */
     .center-abs{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; will-change:transform; }
 
-    /* Notice styling (GPU progress) */
     #noticeCard{ box-shadow: 0 15px 50px rgba(0,0,0,.5); backdrop-filter: blur(15px); }
     #noticeBar{ position:absolute; inset:0 auto 0 0; transform-origin: left center; will-change: transform; transform: scaleX(0); }
     #noticeBall{ box-shadow: 0 8px 18px rgba(0,0,0,.4), inset 0 10px 15px rgba(255,255,255,.35); will-change: transform; transform: translateX(0); }
 
-    /* Neon glow effects */
     .neon-glow{ animation: glow 2s ease-in-out infinite alternate; }
     .neon-border{ border: 2px solid transparent; background: linear-gradient(45deg, #00d4ff, #8b5cf6, #ec4899) border-box; -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
 
@@ -142,7 +138,7 @@
             <button data-action="reset" class="px-3 py-2 rounded-xl btn-glass btn-modern hover:bg-white/20 ring-1 ring-white/10 hover:shadow-neon transition-all duration-300">
               <span class="flex items-center gap-2">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.18 0 2.34-.21 3.41-.6.39-.14.64-.52.64-.94 0-.83-.94-1.36-1.63-.93-.8.5-1.74.77-2.72.77-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5c0 .28-.22.5-.5.5s-.5-.22-.5-.5c0-2.21-1.79-4-4-4s-4 1.79-4 4 1.79 4 4 4c.85 0 1.64-.27 2.29-.72l-1.29-1.29c-.39-.39-.39-1.02 0-1.41.39-.39 1.02-.39 1.41 0l3 3c.39.39.39 1.02 0 1.41ล-3 3c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41l1.29-1.29c-.65.45-1.44.72-2.29.72z"/>
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.18 0 2.34-.21 3.41-.6.39-.14.64-.52.64-.94 0-.83-.94-1.36-1.63-.93-.8.5-1.74.77-2.72.77-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5c0 .28-.22.5-.5.5s-.5-.22-.5-.5c0-2.21-1.79-4-4-4s-4 1.79-4 4 1.79 4 4 4c.85 0 1.64-.27 2.29-.72l-1.29-1.29c-.39-.39-.39-1.02 0-1.41.39-.39 1.02-.39 1.41 0l3 3c.39.39.39 1.02 0 1.41l-3 3c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41l1.29-1.29c-.65.45-1.44.72-2.29.72z"/>
                 </svg>
                 เริ่มใหม่
               </span>
@@ -258,7 +254,6 @@
             <div id="resultsCount" class="text-xs text-slate-400">0 รายการ</div>
           </div>
 
-          <!-- Filters & Tools -->
           <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-2">
               <div class="inline-flex rounded-xl overflow-hidden ring-1 ring-white/10">
@@ -291,7 +286,6 @@
         <span id="noticeLabel">บันทึกการกด</span> · <span id="noticeText" class="text-emerald-300 font-semibold"></span>
       </div>
       <div id="noticeTrack" class="mt-2 h-3 rounded-full bg-white/10 relative overflow-hidden">
-        <!-- ✅ ความกว้าง 100% ใช้ transform: scaleX เพื่อความลื่น -->
         <div id="noticeBar" class="absolute inset-y-0 left-0" style="width:100%"></div>
         <div id="noticeBall" class="absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full ring-1 ring-white/40" style="left:0; transform: translateX(0)"></div>
       </div>
@@ -378,20 +372,16 @@
   </details>
 
   <script>
-  // ===== ป้องกันการซูมแบบครอบจักรวาล (pinch/ctrl+wheel/dblclick/คีย์ลัด) =====
+  // ===== ป้องกันการซูม (pinch/ctrl+wheel/dblclick/คีย์ลัด) =====
   (function preventZoom(){
     const stop = e => { e.preventDefault(); };
-    // iOS Safari gestures
     document.addEventListener('gesturestart', stop, { passive:false });
     document.addEventListener('gesturechange', stop, { passive:false });
     document.addEventListener('gestureend', stop, { passive:false });
-    // Ctrl/Cmd + mousewheel zoom
     window.addEventListener('wheel', e => { if(e.ctrlKey) e.preventDefault(); }, { passive:false });
-    // Keyboard zoom shortcuts
     window.addEventListener('keydown', e => {
       if((e.ctrlKey || e.metaKey) && ['=','+','-','0'].includes(e.key)) e.preventDefault();
     }, { passive:false });
-    // Double-tap/dblclick zoom
     document.addEventListener('dblclick', stop, { passive:false });
   })();
 
@@ -401,8 +391,8 @@
     const STORAGE_KEY = 'snooker-lite-v8';
     const GREEN = '#10b981';
     const RED = '#ef4444';
-    const DURATION_PLUS = 1000;   // 1s for +
-    const DURATION_FOUL = 1000;   // 1s for foul
+    const DURATION_PLUS = 1000;
+    const DURATION_FOUL = 1000;
     const BALLS = [
       { key:'red',    label:'แดง',   value:1, hex:'#ef4444' },
       { key:'yellow', label:'เหลือง',value:2, hex:'#fde047' },
@@ -415,21 +405,21 @@
 
     // ===== State =====
     const state = {
-      players: [],        // [{id,name,score}]
+      players: [],
       selectedId: null,
-      results: [],        // [{id,at,players:[{id,name,score}],winnerIds:[id]}]
-      expanded: new Set(), // UI only
-      filter: { mode: 'all', playerId: '' }, // history filter
+      results: [],
+      expanded: new Set(),
+      filter: { mode: 'all', playerId: '' },
       historyEditMode: false,
       selectedHistoryIds: new Set(),
-      playerOrder: [],    // ลำดับผู้เล่นหลังสุ่ม
+      playerOrder: [],
     };
 
     // ===== Utils =====
     const qs = sel => document.querySelector(sel);
     const $$$ = sel => Array.from(document.querySelectorAll(sel));
     const uid = () => (crypto?.randomUUID?.() || `id_${Date.now()}_${Math.random().toString(36).slice(2,8)}`);
-    const clamp = n => n|0; // integer only
+    const clamp = n => n|0;
 
     function save(){
       try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({ players: state.players, selectedId: state.selectedId, results: state.results, filter: state.filter, playerOrder: state.playerOrder })); }catch(e){}
@@ -457,7 +447,6 @@
       return { top, winnerIds: winners.map(w=>w.id), winners };
     }
 
-    // Rank helper
     function rankPlayers(players){
       const sorted = players.slice().sort((a,b)=> b.score - a.score);
       let lastScore = null, lastRank = 0;
@@ -476,7 +465,7 @@
     function removeEntriesByIds(list, idsSet){ return list.filter(r => !idsSet.has(r.id)); }
     function cleanupExpanded(){ state.expanded = new Set([...state.expanded].filter(id => state.results.some(r=> r.id===id))); }
 
-    // ===== Notice (centered) — optimized with transform for high FPS =====
+    // ===== Notice (centered) — optimized with transform =====
     let noticeRAF = null;
     function runNotice({ kind='plus', text='', ballColor='#fff', barColor=GREEN, durationMs=DURATION_PLUS }){
       const wrap = qs('#notice');
@@ -486,7 +475,7 @@
       const label = qs('#noticeLabel');
       const txt = qs('#noticeText');
       const track = qs('#noticeTrack');
-      const trackW = track.clientWidth; // measure once
+      const trackW = track.clientWidth;
 
       label.textContent = kind==='foul'? 'ฟาวล์' : 'บันทึกการกด';
       txt.textContent = text || '';
@@ -498,7 +487,6 @@
       const start = performance.now();
       const tick = now => {
         const p = Math.min(100, Math.round((now-start)/durationMs*100));
-        // ✅ ใช้ transform แทน width/left → ลื่นขึ้น
         bar.style.transform = `scaleX(${p/100})`;
         const px = (p/100)*trackW - 12;
         ball.style.transform = `translateX(${px}px)`;
@@ -553,10 +541,8 @@
 
     // ===== Renderers =====
     function render(){
-      // Selected name
       qs('#selectedName').textContent = selected()?.name || '—';
 
-      // Players list
       const list = qs('#playersList');
       if(state.players.length===0){
         list.innerHTML = `<div class="p-6 rounded-2xl border border-dashed border-white/20 bg-white/5 text-slate-400 text-center">ยังไม่มีผู้เล่น — เพิ่มชื่อด้านบนได้เลย</div>`;
@@ -585,10 +571,8 @@
         }).join('');
       }
 
-      // Random button state
       qs('[data-action="random-player"]').disabled = state.players.length < 2;
 
-      // Player order display
       const orderDiv = qs('#playerOrder');
       if(state.playerOrder.length > 0) {
         const orderList = qs('#orderList');
@@ -614,7 +598,6 @@
         orderDiv.classList.add('hidden');
       }
 
-      // Balls pad
       const pad = qs('#ballsPad');
       const canScore = !!selected();
       pad.innerHTML = BALLS.map(b=>`
@@ -623,12 +606,10 @@
         </button>
       `).join('');
 
-      // Foul button
       qs('[data-action="foul"]').disabled = !canScore;
 
-      // Results
       renderResults();
-      renderFilterPlayer(); // keep filter list fresh
+      renderFilterPlayer();
     }
 
     function renderResults(){
@@ -739,10 +720,8 @@
       const shuffled = [...state.players].sort(() => Math.random() - 0.5);
       state.playerOrder = shuffled.map(p => p.id);
       const firstPlayer = shuffled[0];
-      const resultDiv = qs('#randomResult');
-      const nameEl = qs('#randomPlayerName');
-      nameEl.textContent = firstPlayer.name;
-      resultDiv.classList.remove('hidden');
+      qs('#randomPlayerName').textContent = firstPlayer.name;
+      qs('#randomResult').classList.remove('hidden');
       save(); render();
     }
 
@@ -751,7 +730,7 @@
       save(); render();
     }
 
-    // ✅ คะแนนสามารถติดลบได้แล้ว (เอา Math.max ออก)
+    // คะแนนติดลบได้
     function addScore(ballKey){
       const p = selected();
       if(!p) return;
@@ -770,13 +749,21 @@
       save(); render();
     }
 
+    // ⛳️ FIX: จบเกมส์ -> บันทึกสแนปช็อตแบบ deep clone + รีเซ็ตคะแนนปัจจุบันทันที
     function endGame(){
       if(state.players.length===0){
         showModal('ไม่มีผู้เล่น', 'เพิ่มผู้เล่นก่อนจบเกมส์');
         return;
       }
-      const entry = { id: uid(), at: Date.now(), players: state.players.slice(), winnerIds: computeWinners(state.players).winnerIds };
+      // สแนปช็อตของผู้เล่น ณ ตอนนี้ (ตัดการอ้างอิง)
+      const snapshot = state.players.map(p => ({ id: p.id, name: p.name, score: p.score }));
+      const entry = { id: uid(), at: Date.now(), players: snapshot, winnerIds: computeWinners(snapshot).winnerIds };
       state.results.push(entry);
+
+      // รีเซ็ตคะแนนปัจจุบันให้เป็น 0 (เริ่มเกมใหม่ทันที แต่ยังคงรายชื่อ)
+      state.players.forEach(p => p.score = 0);
+      state.selectedId = null;
+
       showCelebrate(entry);
       save(); render();
     }
@@ -860,7 +847,7 @@
 
     function escapeHtml(text){ return text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
 
-    // ===== Event Delegation (keeps player click working) =====
+    // ===== Event Delegation =====
     document.addEventListener('click', e => {
       const actionEl = e.target.closest('[data-action]');
       if(actionEl){
@@ -928,7 +915,7 @@
         out.push(`✓ Clamp function: ${clamp(-5.7)} === -5`);
         const testPlayers = [{id:'a',name:'A',score:10},{id:'b',name:'B',score:15},{id:'c',name:'C',score:10}];
         const winners = computeWinners(testPlayers);
-        out.push(`✓ Winner computation: ${winners.winners.length === 1 && winners.winners[0].name === 'B' ? 'OK' : 'FAIL'}`);
+        out.push(`✓ Winner computation: ${winners.winners.length === 1 && winners[0].name === 'B' ? 'OK' : 'FAIL'}`);
         const ranked = rankPlayers(testPlayers);
         out.push(`✓ Ranking: ${ranked[0].pos === 1 && ranked[1].pos === 2 && ranked[2].pos === 2 ? 'OK' : 'FAIL'}`);
         out.push(`✓ All tests completed at ${new Date().toLocaleTimeString()}`);
@@ -941,4 +928,4 @@
   })();
   </script>
 </body>
-</html>
+</html>ๅ
